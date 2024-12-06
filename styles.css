@@ -181,7 +181,15 @@ table th {
 .login-links:hover {
     color: #0056b3; /* Darker shade on hover */
 }
-
+.logout-button {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 14px;
+    margin-left: 0px;
+    color: #007bff; /* Link color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+    text-align: right;
+}
 
 /* Footer */
 .footer {
