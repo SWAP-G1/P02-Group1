@@ -1,8 +1,10 @@
 body {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 16px;
-    background-color: #f8f9fa; /* Light gray background for better contrast */
-    color: #333;
+    background-image: url('school.png');
+    background-size: cover;  /* Ensures the image covers the entire page */
+    background-position: center center;  /* Centers the image */
+    background-attachment: fixed;  /* Makes the background fixed when scrolling */
     line-height: 1.6;
     display: flex;             /* Enable Flexbox on the body */
     flex-direction: column;    /* Stack elements vertically */
@@ -257,7 +259,9 @@ table th {
 }
 
 /* Responsive Design: Adjust grid layout for smaller screens */
-
+.widget-card:nth-child(4) {
+    grid-column: 2; /* This will move it to the second column */
+}
 
 
 
