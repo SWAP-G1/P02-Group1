@@ -12,11 +12,11 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-brand">
-            <img src="bwlogo-removebg.png" alt="School Logo" class="school-logo">
+            <img src="bwlogo-removebg.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>Polytechnic Management</h1>
         </div>
-        <div>
-            <a href="logout.php" class="navbar-link">Logout</a>
+        <div class="logout-button">
+            <a href="logout.php">Logout</a>
         </div>
     </nav>
 
