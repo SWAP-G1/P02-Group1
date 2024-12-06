@@ -183,7 +183,6 @@ table th {
 }
 
 
-
 /* Footer */
 .footer {
     text-align: center;
@@ -194,12 +193,7 @@ table th {
     width: auto; /* Make footer span the full width */
 }
 
-/* General Layout Styles */
-/* General Layout Styles */
-/* Card Grid Container (Renamed to avoid conflict) */
-/* General Layout Styles */
-/* General Layout Styles */
-/* General Layout Styles */
+
 /* General Layout Styles */
 .card-grid-container {
     display: grid;
@@ -224,10 +218,10 @@ table th {
     cursor: pointer;
     transition: all 0.3s ease;
     color: #333; /* Ensure cards fit within the defined width */
-    justify-content: center;
     align-items: center;
     margin: 0 auto; /* Center the card */
     width: 300px;
+    height: 145px;
 }
 
 /* Align left column cards to the right (with a small gap) */
