@@ -198,7 +198,7 @@ table th {
 .card-grid-container {
     display: grid;
     grid-template-columns: repeat(3, 350px);
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     grid-column-gap: 10px;
     grid-row-gap: 20px; 
     padding-top: 30px;
