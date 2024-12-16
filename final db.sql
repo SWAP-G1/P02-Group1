@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 08, 2024 at 05:56 PM
+-- Generation Time: Dec 16, 2024 at 09:38 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,6 +33,15 @@ CREATE TABLE `class` (
   `class_type` enum('Semester','Term') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `class`
+--
+
+INSERT INTO `class` (`class_code`, `course_code`, `class_type`) VALUES
+('HY23', 'T76', 'Semester'),
+('PC02', 'T89', 'Semester'),
+('TC09', 'B77', 'Semester');
+
 -- --------------------------------------------------------
 
 --
@@ -58,16 +67,14 @@ CREATE TABLE `course` (
   `status` enum('To start','In-progress','Ended') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `course_to_student`
+-- Dumping data for table `course`
 --
 
-CREATE TABLE `course_to_student` (
-  `course_code` varchar(3) NOT NULL,
-  `identification_code` varchar(4) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `course` (`course_code`, `course_name`, `course_start_date`, `course_end_date`, `status`) VALUES
+('B77', 'CORPORATE FINANCE', '2024-12-20', '2024-12-28', 'To start'),
+('T76', 'Digital Forensics', '2024-12-18', '2024-12-28', 'To start'),
+('T89', 'Ethical Hacking', '2024-12-13', '2025-03-05', 'To start');
 
 -- --------------------------------------------------------
 
@@ -80,6 +87,13 @@ CREATE TABLE `diploma` (
   `diploma_name` varchar(50) NOT NULL,
   `school_code` varchar(3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `diploma`
+--
+
+INSERT INTO `diploma` (`diploma_code`, `diploma_name`, `school_code`) VALUES
+('CDF', 'Cybersecurity & Digital Forensics', 'IIT');
 
 -- --------------------------------------------------------
 
@@ -102,6 +116,15 @@ CREATE TABLE `role` (
   `role_id` enum('1','2','3') NOT NULL,
   `role_name` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `role`
+--
+
+INSERT INTO `role` (`role_id`, `role_name`) VALUES
+('1', 'Admin'),
+('2', 'Faculty'),
+('3', 'Student');
 
 -- --------------------------------------------------------
 
@@ -160,6 +183,18 @@ CREATE TABLE `student` (
   `class_code` varchar(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `student`
+--
+
+INSERT INTO `student` (`identification_code`, `diploma_code`, `class_code`) VALUES
+('400F', 'CDF', 'HY23'),
+('400F', 'CDF', 'PC02'),
+('400F', 'CDF', 'TC09'),
+('555F', 'CDF', 'HY23'),
+('555F', 'CDF', 'TC09'),
+('555F', 'CDF', 'PC02');
+
 -- --------------------------------------------------------
 
 --
@@ -188,6 +223,14 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`identification_code`, `email`, `password`, `role_id`, `phone_number`, `full_name`) VALUES
+('400F', '400F@student.xyz.sg', '$2y$10$Ck6swiDNF', 3, 12341234, 'jiun'),
+('555F', '555F@student.xyz.sg', '$2y$10$o3LFjOq1/', 3, 88888888, 'alwee');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -210,13 +253,6 @@ ALTER TABLE `class_to_faculty`
 --
 ALTER TABLE `course`
   ADD PRIMARY KEY (`course_code`);
-
---
--- Indexes for table `course_to_student`
---
-ALTER TABLE `course_to_student`
-  ADD KEY `course_code_idx` (`course_code`),
-  ADD KEY `identification_code_idx` (`identification_code`);
 
 --
 -- Indexes for table `diploma`
@@ -296,13 +332,6 @@ ALTER TABLE `class_to_faculty`
   ADD CONSTRAINT `faculty_identification_code_fk` FOREIGN KEY (`identification_code`) REFERENCES `user` (`identification_code`);
 
 --
--- Constraints for table `course_to_student`
---
-ALTER TABLE `course_to_student`
-  ADD CONSTRAINT `course_to_student_fk` FOREIGN KEY (`course_code`) REFERENCES `course` (`course_code`),
-  ADD CONSTRAINT `student_to_course_fk` FOREIGN KEY (`identification_code`) REFERENCES `user` (`identification_code`);
-
---
 -- Constraints for table `diploma`
 --
 ALTER TABLE `diploma`
@@ -333,7 +362,7 @@ ALTER TABLE `semester_gpa_to_course_code`
 --
 ALTER TABLE `student`
   ADD CONSTRAINT `student_class_code_fk` FOREIGN KEY (`class_code`) REFERENCES `class` (`class_code`),
-  ADD CONSTRAINT `student_identification_code_fk` FOREIGN KEY (`identification_code`) REFERENCES `user` (`identification_code`),
+  ADD CONSTRAINT `student_identification_code_fk` FOREIGN KEY (`identification_code`) REFERENCES `user` (`identification_code`) ON DELETE CASCADE,
   ADD CONSTRAINT `student_to_diploma_code_fk` FOREIGN KEY (`diploma_code`) REFERENCES `diploma` (`diploma_code`);
 
 --
