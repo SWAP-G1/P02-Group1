@@ -1,8 +1,10 @@
 body {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 16px;
-    background-color: #f8f9fa; /* Light gray background for better contrast */
-    color: #333;
+    background-image: url('school.png');
+    background-size: cover;  /* Ensures the image covers the entire page */
+    background-position: center center;  /* Centers the image */
+    background-attachment: fixed;  /* Makes the background fixed when scrolling */
     line-height: 1.6;
     display: flex;             /* Enable Flexbox on the body */
     flex-direction: column;    /* Stack elements vertically */
@@ -181,8 +183,15 @@ table th {
 .login-links:hover {
     color: #0056b3; /* Darker shade on hover */
 }
-
-
+.logout-button {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 14px;
+    margin-left: 0px;
+    color: #007bff; /* Link color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+    text-align: right;
+}
 
 /* Footer */
 .footer {
@@ -193,6 +202,68 @@ table th {
     margin-top: auto; /* Pushes footer to the bottom */
     width: auto; /* Make footer span the full width */
 }
+
+
+/* General Layout Styles */
+.card-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 350px);
+    grid-template-rows: repeat(2, 1fr);
+    grid-column-gap: 10px;
+    grid-row-gap: 20px; 
+    padding-top: 30px;
+    align-self: center;
+}
+
+/* Card Styling (Widget Cards) */
+.widget-card {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #333; /* Ensure cards fit within the defined width */
+    align-items: center;
+    margin: 0 auto; /* Center the card */
+    width: 300px;
+    height: 145px;
+}
+
+/* Align left column cards to the right (with a small gap) */
+
+
+/* Card Title Styling */
+.widget-card h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 20px; /* Larger font size for the title */
+    text-align: center;
+}
+
+/* Card Description Styling */
+.widget-card p {
+    font-size: 16px; /* Larger font size for the description */
+    text-align: center;
+}
+
+/* Hover Effect for Cards */
+.widget-card:hover {
+    background-color: #f0f0f0; /* Light grey background on hover */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+/* Responsive Design: Adjust grid layout for smaller screens */
+.widget-card:nth-child(4) {
+    grid-column: 2; /* This will move it to the second column */
+}
+
+
 
 /* Utility Classes 
 .text-center {
