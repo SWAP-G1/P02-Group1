@@ -11,7 +11,7 @@
 
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="bwlogo-removebg.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
