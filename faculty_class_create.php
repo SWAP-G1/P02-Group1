@@ -1,5 +1,12 @@
 <?php
+session_start();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die('Invalid CSRF token. Possible CSRF attack detected.');
+    }
+
     // Connect to the database
     $con = mysqli_connect("localhost", "root", "", "xyz polytechnic");
     if (!$con) {
@@ -78,6 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error</title>
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">

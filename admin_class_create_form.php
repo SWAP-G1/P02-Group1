@@ -1,10 +1,13 @@
 <?php
 session_start(); // Start the session
 
-$con = mysqli_connect("localhost","root","","xyz polytechnic"); //connect to database
+$con = mysqli_connect("localhost","root","","xyz polytechnic"); // Connect to database
 if (!$con){
-	die('Could not connect: ' . mysqli_connect_errno()); //return error is connect fail
+    die('Could not connect: ' . mysqli_connect_errno()); // Return error if connection fails
 }
+
+// Generate CSRF token if not already set
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
 
 // Check if the user is logged in and has the correct role
@@ -36,7 +39,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
         </div>
         <nav>
             <a href="#">Home</a>
-            <a href="#">Logout</a>
+            <a href="logout.php">Logout</a>
             <a><?php echo htmlspecialchars($full_name); ?></a>
         </nav>
     </div>
@@ -66,6 +69,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
                         <option value="Term">Term</option>
                     </select>
                 </div>
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <button type="submit">Submit</button>
             </form>
         </div>
@@ -97,7 +101,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
                 echo '<td>' . $row['course_code'] . '</td>'; // Corrected column name
                 echo '<td>' . $row['class_type'] . '</td>'; // Corrected column name
                 echo '<td> <a href="admin_class_update_form.php?class_code=' . $row['class_code'] . '">Edit</a> </td>';
-                echo '<td> <a href="admin_class_delete.php?class_code=' . $row['class_code'] . '">Delete</a> </td>';
+                echo '<td> <a href="admin_class_delete.php?class_code=' . $row['class_code'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Delete</a> </td>';
                 echo '</tr>';
             }
 

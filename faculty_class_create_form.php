@@ -1,10 +1,14 @@
 <?php
 session_start(); // Start the session
 
-$con = mysqli_connect("localhost","root","","xyz polytechnic"); //connect to database
-if (!$con){
-	die('Could not connect: ' . mysqli_connect_errno()); //return error is connect fail
+$con = mysqli_connect("localhost", "root", "", "xyz polytechnic"); // Connect to database
+if (!$con) {
+    die('Could not connect: ' . mysqli_connect_errno()); // Return error if connection fails
 }
+
+// Generate CSRF token
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
 
 // Check if the user is logged in and has the correct role
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
@@ -16,7 +20,6 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
 $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,7 +39,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
         </div>
         <nav>
             <a href="#">Home</a>
-            <a href="#">Logout</a>
+            <a href="logout.php">Logout</a>
             <a><?php echo htmlspecialchars($full_name); ?></a>
         </nav>
     </div>
@@ -50,6 +53,8 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
         <div class="card">
             <h3>Class Details</h3>
             <form method="POST" action="faculty_class_create.php">
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
                 <div class="form-group">
                     <label class="label" for="class_code">Class Code</label>
                     <input type="text" name="class_code" placeholder="Enter Class code" required>
@@ -73,11 +78,6 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
         <div class="card">
             <h3>Class Records</h3>
             <?php
-            $con = mysqli_connect("localhost", "root", "", "xyz polytechnic"); // Connect to the database
-            if (!$con) {
-                die('Could not connect: ' . mysqli_connect_errno()); // Return error if connection fails
-            }
-
             // Prepare the statement
             $stmt = $con->prepare("SELECT * FROM class");
 
