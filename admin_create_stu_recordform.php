@@ -1,10 +1,30 @@
+<?php
+session_start();
+$con = mysqli_connect("localhost", "root", "", "xyz polytechnic"); // Connect to database
+$error_message = "";
+
+if (!$con) {
+    $error_message = 'Could not connect: ' . mysqli_connect_errno();
+}
+// Generate CSRF token if not already set
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+// Check if the user is logged in and has the correct role
+if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
+    // Redirect to login page if the user is not logged in or not an admin
+    header("Location: testlogin.php");
+    exit();
+}
+$full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Profile Management</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="main_styles.css"> <!-- Link to your CSS file -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
     <script>
         // Function to fetch course details for a given class code
@@ -94,6 +114,7 @@
                     <p>Course Code: <span id="course_code_3">N/A</span></p>
                     <p>Course Name: <span id="course_name_3">N/A</span></p>
                 </div>
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <button type="submit">Submit</button>
             </form>
         </div>
