@@ -1,5 +1,3 @@
-<html>
-<body>  
 <?php
 session_start();
 $con = mysqli_connect("localhost", "root", "", "xyz polytechnic"); // Connect to database
@@ -8,17 +6,18 @@ $con = mysqli_connect("localhost", "root", "", "xyz polytechnic"); // Connect to
 $error_message = "";
 
 if (!$con) {
-    $error_message = 'Could not connect: ' . mysqli_connect_errno();
+    die('Could not connect to the database: ' . mysqli_connect_error());
 }
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Verify CSRF token
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die('Invalid CSRF token. Possible CSRF attack detected.');
     }
 
-    // Get and validate the student ID from the GET request
-    if (isset($_GET["student_id"])) {
-        $student_id_code = htmlspecialchars($_GET["student_id"]);
+    // Get and validate the student ID from the POST request
+    if (isset($_POST["student_id"])) {
+        $student_id_code = htmlspecialchars($_POST["student_id"]);
 
         // Define the regex pattern: 3 digits followed by a letter
         $pattern = '/^\d{3}[A-Z]$/';
@@ -48,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $con->commit();
 
                 // Redirect to the student profile form upon successful deletion
-                header("Location: create_stu_recordform.php");
+                header("Location: admin_create_stu_recordform.php?message=Student+record+deleted+successfully");
                 exit;
 
             } catch (Exception $e) {
@@ -56,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $con->rollback();
                 $error_message = "Error deleting record: " . $e->getMessage();
             }
-
         } else {
             // If validation fails
             $error_message = "Invalid Student ID format. It must be 3 digits followed by an alphabet.";
@@ -64,10 +62,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error_message = "Student ID not provided.";
     }
-
-    // Close SQL connection
-    $con->close();
 }
+
+// Close SQL connection
+$con->close();
 ?>
 
 <!DOCTYPE html>
@@ -77,7 +75,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error</title>
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
