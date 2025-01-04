@@ -194,25 +194,30 @@ echo '<tr>
     </tr>';
 
 // Loop through each student record in the organized array
-foreach ($students as $student) {
-    echo '<tr>';
-    echo '<td>' . $student['identification_code'] . '</td>';
-    echo '<td>' . $student['full_name'] . '</td>';
-    echo '<td>' . $student['phone_number'] . '</td>';
-    echo '<td>' . $student['class_code_1'] . '</td>';
-    echo '<td>' . $student['class_code_2'] . '</td>';
-    echo '<td>' . $student['class_code_3'] . '</td>';
-    echo '<td>' . $student['diploma_code'] . '</td>';
-    echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . $student['identification_code'] . '">Edit</a> </td>';
-    echo '<td>
-            <form action="admin_delete_stu_record.php" method="POST" style="display:inline;">
-                <input type="hidden" name="student_id" value="' . $student['identification_code'] . '">
-                <input type="hidden" name="csrf_token" value="' . $_SESSION['csrf_token'] . '">
-                <button type="submit" onclick="return confirm(\'Are you sure you want to delete this student?\')">Delete</button>
-            </form>
-          </td>';
-    echo '</tr>';
+$stu_id_pattern = '/^\d{3}[A-Z]$/';
+
+foreach ($students as $student_id => $student) {
+    if (preg_match($stu_id_pattern, $student['identification_code'])) { //ensures only the students with the matching id format is displayed and exclude admins and faculty
+        echo '<tr>';
+        echo '<td>' . $student['identification_code'] . '</td>';
+        echo '<td>' . $student['full_name'] . '</td>';
+        echo '<td>' . $student['phone_number'] . '</td>';
+        echo '<td>' . $student['class_code_1'] . '</td>';
+        echo '<td>' . $student['class_code_2'] . '</td>';
+        echo '<td>' . $student['class_code_3'] . '</td>';
+        echo '<td>' . $student['diploma_code'] . '</td>';
+        echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . $student['identification_code'] . '">Edit</a> </td>';
+        echo '<td>
+                <form action="admin_delete_stu_record.php" method="POST" style="display:inline;">
+                    <input type="hidden" name="student_id" value="' . $student['identification_code'] . '">
+                    <input type="hidden" name="csrf_token" value="' . $_SESSION['csrf_token'] . '">
+                    <button type="submit" onclick="return confirm(\'Are you sure you want to delete this student?\')">Delete</button>
+                </form>
+              </td>';
+        echo '</tr>';
+    }
 }
+
 
 // End the HTML table
 echo '</table>';
