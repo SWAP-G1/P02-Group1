@@ -142,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Commit transaction
             $con->commit();
-            header("Location: create_stu_recordform.php");
+            header("Location: admin_create_stu_recordform.php");
             exit;
         } catch (Exception $e) {
             $error_message = "Error: " . $e->getMessage();
