@@ -144,7 +144,7 @@ $con->close();
                     </div>
                 <div class="form-group">
                     <label class="label" for="class_code_1">Class Code 1</label>
-                    <input type="text" name="upd_class_code_1" value="<?php echo htmlspecialchars($class_codes[0]); ?>" required>
+                    <input type="text" id="class_code_1" name="upd_class_code_1" placeholder="Enter Class Code 1" value="<?php echo htmlspecialchars($class_codes[0]); ?>" required>
                     <button type="button" onclick="fetchCourseDetails('class_code_1', 'course_code_1', 'course_name_1')">Search</button>
                     <p>Course Code: <span id="course_code_1">N/A</span></p>
                     <p>Course Name: <span id="course_name_1">N/A</span></p>
@@ -153,7 +153,7 @@ $con->close();
                 <!-- Class Code 2 -->
                 <div class="form-group">
                     <label class="label" for="class_code_2">Class Code 2</label>
-                    <input type="text" name="upd_class_code_2" value="<?php echo htmlspecialchars($class_codes[1]); ?>">
+                    <input type="text" id="class_code_2" name="upd_class_code_2" placeholder="Enter Class Code 2" value="<?php echo htmlspecialchars($class_codes[1]); ?>">
                     <button type="button" onclick="fetchCourseDetails('class_code_2', 'course_code_2', 'course_name_2')">Search</button>
                     <p>Course Code: <span id="course_code_2">N/A</span></p>
                     <p>Course Name: <span id="course_name_2">N/A</span></p>
@@ -162,7 +162,7 @@ $con->close();
                 <!-- Class Code 3 -->
                 <div class="form-group">
                     <label class="label" for="class_code_3">Class Code 3</label>
-                    <input type="text" name="upd_class_code_3" value="<?php echo htmlspecialchars($class_codes[2]); ?>">
+                    <input type="text" id="class_code_3" name="upd_class_code_3" placeholder="Enter Class Code 3" value="<?php echo htmlspecialchars($class_codes[2]); ?>">
                     <button type="button" onclick="fetchCourseDetails('class_code_3', 'course_code_3', 'course_name_3')">Search</button>
                     <p>Course Code: <span id="course_code_3">N/A</span></p>
                     <p>Course Name: <span id="course_name_3">N/A</span></p>
