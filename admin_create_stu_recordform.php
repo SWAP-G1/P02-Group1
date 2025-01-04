@@ -24,7 +24,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Profile Management</title>
-    <link rel="stylesheet" href="main_styles.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
     <script>
         // Function to fetch course details for a given class code
@@ -55,12 +55,12 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
 <body>
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="bwlogo-removebg.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-            <a href="#">Home</a>
-            <a href="#">Logout</a>
+            <a href="admin_dashboard.php">Home</a>
+            <a href="logout.php">Logout</a>
         </nav>
     </div>
 
@@ -72,7 +72,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
 
         <div class="card">
             <h3>Student Profile Form</h3>
-            <form method="POST" action="create_stu_record.php">
+            <form method="POST" action="admin_create_stu_record.php">
                 <div class="form-group">
                     <label class="label" for="student_name">Student Name</label>
                     <input type="text" name="student_name" placeholder="Enter Student Name" required>
@@ -122,13 +122,6 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
         <div class="card">
             <h3>Student Records</h3>
             <?php
-// Establish a connection to the MySQL database
-$con = mysqli_connect("localhost", "admin", "admin", "xyz polytechnic");
-
-// Check if the connection failed
-if (!$con) {
-    die('Could not connect: ' . mysqli_connect_errno()); // Display an error message and terminate script
-}
 
 // Prepare the SQL query to fetch student details and their associated class codes
 $stmt = $con->prepare("
@@ -203,15 +196,21 @@ echo '<tr>
 // Loop through each student record in the organized array
 foreach ($students as $student) {
     echo '<tr>';
-    echo '<td>' . $student['identification_code'] . '</td>'; // Display the student ID
-    echo '<td>' . $student['full_name'] . '</td>';           // Display the student's name
-    echo '<td>' . $student['phone_number'] . '</td>';        // Display the student's phone number
-    echo '<td>' . $student['class_code_1'] . '</td>';        // Display the first class code
-    echo '<td>' . $student['class_code_2'] . '</td>';        // Display the second class code
-    echo '<td>' . $student['class_code_3'] . '</td>';        // Display the third class code
-    echo '<td>' . $student['diploma_code'] . '</td>';        // Display the diploma code
-    echo '<td> <a href="update_stu_recordform.php?student_id=' . $student['identification_code'] . '">Edit</a> </td>'; // Edit link
-    echo '<td> <a href="delete_stu_record.php?student_id=' . $student['identification_code'] . '">Delete</a> </td>'; // Delete link for selected student
+    echo '<td>' . $student['identification_code'] . '</td>';
+    echo '<td>' . $student['full_name'] . '</td>';
+    echo '<td>' . $student['phone_number'] . '</td>';
+    echo '<td>' . $student['class_code_1'] . '</td>';
+    echo '<td>' . $student['class_code_2'] . '</td>';
+    echo '<td>' . $student['class_code_3'] . '</td>';
+    echo '<td>' . $student['diploma_code'] . '</td>';
+    echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . $student['identification_code'] . '">Edit</a> </td>';
+    echo '<td>
+            <form action="admin_delete_stu_record.php" method="POST" style="display:inline;">
+                <input type="hidden" name="student_id" value="' . $student['identification_code'] . '">
+                <input type="hidden" name="csrf_token" value="' . $_SESSION['csrf_token'] . '">
+                <button type="submit" onclick="return confirm(\'Are you sure you want to delete this student?\')">Delete</button>
+            </form>
+          </td>';
     echo '</tr>';
 }
 
