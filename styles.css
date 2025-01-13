@@ -1,26 +1,28 @@
+/* General Reset and Body Styles */
 body {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 16px;
     background-image: url('school.png');
-    background-size: cover;  /* Ensures the image covers the entire page */
-    background-position: center center;  /* Centers the image */
-    background-attachment: fixed;  /* Makes the background fixed when scrolling */
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-color: #f8f9fa;
+    color: #333;
     line-height: 1.6;
-    display: flex;             /* Enable Flexbox on the body */
-    flex-direction: column;    /* Stack elements vertically */
-    min-height: 100vh;         /* Ensure body takes up at least the full viewport height */
-    margin: 0;                 /* Remove default body margin */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
 }
-
 
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
-    color: #262a2e; /* Dark gray for headers */
+    color: #262a2e;
 }
 
-h1 { /* Main Header */
+h1 {
     font-size: 26px;
     margin-bottom: 20px;
     color: #f8f9fa;
@@ -41,7 +43,7 @@ button, .button {
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     font-weight: 500;
-    background-color: #113f84; /* Bootstrap primary color for buttons */
+    background-color: #113f84;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -51,7 +53,7 @@ button, .button {
 }
 
 button:hover, .button:hover {
-    background-color: #0056b3; /* Darker shade for hover effect */
+    background-color: #0056b3;
 }
 
 /* Links */
@@ -65,17 +67,32 @@ a:hover {
     color: #0056b3;
 }
 
-/* Inputs */
-input[type="text"], input[type="password"], textarea, select {
+
+
+select {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 16px;
-    width: 95%;
+    width: 1125px; /* Match the width of the input fields */
+    padding: 10px; /* Ensure consistent padding */
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+/* Inputs */
+input[type="text"], input[type="password"], textarea {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 16px;
+    width: 95%; /* Ensure consistency */
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ced4da;
     border-radius: 4px;
     transition: border-color 0.3s ease;
 }
+
+
 
 input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
     border-color: #007bff;
@@ -84,7 +101,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 
 /* Containers */
 .container {
-    flex: 1; /* This makes sure the content takes up the available space */
+    flex: 1;
     width: 90%;
     max-width: 1200px;
     margin: 0 auto;
@@ -105,7 +122,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #113f84; /* Dark gray for navbar */
+    background-color: #113f84;
     padding: 0px 20px;
 }
 
@@ -128,8 +145,8 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 
 .navbar-brand h1 {
     font-size: 24px;
-    color: #fff; /* Change color as needed */
-    margin-left: 0px; /* Space between logo and header text */
+    color: #fff;
+    margin-left: 0px;
 }
 
 .school-logo {
@@ -162,36 +179,12 @@ table th {
     margin-bottom: 15px;
 }
 
-/* Label styling to align label text and forgot link horizontally */
 .label {
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* This helps separate label text and link */
-}
-
-/* Forgot Password link styling */
-.login-links {
-    font-family: 'Nunito Sans', sans-serif;
-    font-size: 14px;
-    margin-left: 0px;
-    color: #007bff; /* Link color */
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.login-links:hover {
-    color: #0056b3; /* Darker shade on hover */
-}
-.logout-button {
-    font-family: 'Nunito Sans', sans-serif;
-    font-size: 14px;
-    margin-left: 0px;
-    color: #007bff; /* Link color */
-    text-decoration: none;
-    transition: color 0.3s ease;
-    text-align: right;
+    justify-content: space-between;
 }
 
 /* Footer */
@@ -200,10 +193,9 @@ table th {
     padding: 20px;
     background-color: #343a40;
     color: #fff;
-    margin-top: auto; /* Pushes footer to the bottom */
-    width: auto; /* Make footer span the full width */
+    margin-top: auto;
+    width: auto;
 }
-
 
 /* General Layout Styles */
 .card-grid-container {
@@ -211,12 +203,11 @@ table th {
     grid-template-columns: repeat(3, 350px);
     grid-template-rows: repeat(2, 1fr);
     grid-column-gap: 10px;
-    grid-row-gap: 20px; 
+    grid-row-gap: 20px;
     padding-top: 30px;
     align-self: center;
 }
 
-/* Card Styling (Widget Cards) */
 .widget-card {
     text-decoration: none;
     display: flex;
@@ -228,68 +219,39 @@ table th {
     padding: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: #333; /* Ensure cards fit within the defined width */
+    color: #333;
     align-items: center;
-    margin: 0 auto; /* Center the card */
+    margin: 0 auto;
     width: 300px;
     height: 145px;
 }
 
-/* Align left column cards to the right (with a small gap) */
-
-
-/* Card Title Styling */
 .widget-card h2 {
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     margin-bottom: 10px;
-    font-size: 20px; /* Larger font size for the title */
+    font-size: 20px;
     text-align: center;
 }
 
-/* Card Description Styling */
 .widget-card p {
-    font-size: 16px; /* Larger font size for the description */
+    font-size: 16px;
     text-align: center;
 }
 
-/* Hover Effect for Cards */
 .widget-card:hover {
-    background-color: #f0f0f0; /* Light grey background on hover */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+    background-color: #f0f0f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Responsive Design: Adjust grid layout for smaller screens */
 .widget-card:nth-child(4) {
-    grid-column: 2; /* This will move it to the second column */
+    grid-column: 2;
 }
 
-
-
-/* Utility Classes 
 .text-center {
     text-align: center;
 }
-*/
 
-/*
-.mt-1 { margin-top: 5px; }
-.mt-2 { margin-top: 10px; }
-.mt-3 { margin-top: 15px; }
-.mt-4 { margin-top: 20px; }
-
-.mb-1 { margin-bottom: 5px; }
-.mb-2 { margin-bottom: 10px; }
-.mb-3 { margin-bottom: 15px; }
-.mb-4 { margin-bottom: 20px; }
-
-.p-1 { padding: 5px; }
-.p-2 { padding: 10px; }
-.p-3 { padding: 15px; }
-.p-4 { padding: 20px; }
-*/
-
-/* Responsive Design 
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
@@ -300,5 +262,4 @@ table th {
         width: 100%;
         padding: 10px;
     }
-} 
-*/
+}
