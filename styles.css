@@ -92,6 +92,26 @@ select:focus {
     background-color: #ffffff; /* White background when focused */
 }
 
+#scrollToTop {
+    position: fixed; /* Keeps the button in the same position in the viewport */
+    bottom: auto; /* Reset the default bottom positioning */
+    top: 1000px; /* Adjust distance from the top of the viewport */
+    right: 400px; /* Distance from the right edge of the viewport */
+    z-index: 1000; /* Ensure it stays above other elements */
+    font-size: 14px;
+    padding: 10px 20px;
+    background-color: #113f84; /* Matches your theme */
+    color: #fff;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    display: block; /* Hidden until user scrolls */
+}
+
+#scrollToTop:hover {
+    background-color: #0056b3;
+}
+
 /* Inputs */
 input[type="text"], input[type="password"], textarea {
     font-family: 'Nunito Sans', sans-serif;
