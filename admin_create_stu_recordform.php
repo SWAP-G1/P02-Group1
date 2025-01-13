@@ -17,6 +17,18 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
     exit();
 }
 $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
+$class_query = "SELECT class_code FROM class";
+$class_result = mysqli_query($con, $class_query);
+
+// Fetch all class codes into an array
+$class_codes = [];
+if ($class_result && mysqli_num_rows($class_result) > 0) {
+    while ($row = mysqli_fetch_assoc($class_result)) {
+        $class_codes[] = $row['class_code'];
+    }
+}
+$diploma_query = "SELECT diploma_code FROM diploma";
+$diploma_result = mysqli_query($con, $diploma_query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,31 +38,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
     <title>Student Profile Management</title>
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
-    <script>
-        // Function to fetch course details for a given class code
-        async function fetchCourseDetails(inputId, courseCodeId, courseNameId) {
-            const classCode = document.getElementById(inputId).value;
-            if (!classCode) {
-                alert("Please enter a class code.");
-                return;
-            }
 
-            try {
-                const response = await fetch(`fetch_course_details.php?class_code=${classCode}`);
-                const data = await response.json();
-                if (data.error) {
-                    alert(data.error);
-                    document.getElementById(courseCodeId).textContent = "N/A";
-                    document.getElementById(courseNameId).textContent = "N/A";
-                } else {
-                    document.getElementById(courseCodeId).textContent = data.course_code;
-                    document.getElementById(courseNameId).textContent = data.course_name;
-                }
-            } catch (err) {
-                alert("Failed to fetch course details. Please try again.");
-            }
-        }
-    </script>
 </head>
 <body>
     <div class="navbar">
@@ -86,34 +74,54 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
                     <input type="text" name="student_id_code" placeholder="Enter Student ID Code" maxlength="4" required>
                 </div>
                 <div class="form-group">
-                    <label class="label" for="diploma_code">Diploma Code</label>
-                    <input type="text" name="diploma_code" placeholder="Enter Diploma Code" required>
+                <label class="label" for="diploma_code">Diploma Code</label>
+                <select name="diploma_code" required>
+                        <option value="" disabled selected>Select a Diploma Code</option>
+                        <?php
+                        if ($diploma_result && mysqli_num_rows($diploma_result) > 0) {
+                            while ($row = mysqli_fetch_assoc($diploma_result)) {
+                                echo "<option value='" . htmlspecialchars($row['diploma_code']) . "'>" . htmlspecialchars($row['diploma_code']) . "</option>";
+                            }
+                        }
+                        ?>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label class="label" for="class_code_1">Class Code 1</label>
-                    <input type="text" id="class_code_1" name="class_code_1" placeholder="Enter Class Code 1" required>
-                    <button type="button" onclick="fetchCourseDetails('class_code_1', 'course_code_1', 'course_name_1')">Search</button>
-                    <p>Course Code: <span id="course_code_1">N/A</span></p>
-                    <p>Course Name: <span id="course_name_1">N/A</span></p>
-                </div>
+                <label class="label" for="class_code_1">Class Code 1</label>
+                <select name="class_code_1" required>
+                    <option value="" disabled selected>Select a Class Code</option>
+                    <?php
+                    foreach ($class_codes as $class_code) {
+                        echo "<option value='" . htmlspecialchars($class_code) . "'>" . htmlspecialchars($class_code) . "</option>";
+                    }
+                    ?>
+                </select>
+            </div>
 
-                <!-- Class Code 2 -->
-                <div class="form-group">
-                    <label class="label" for="class_code_2">Class Code 2</label>
-                    <input type="text" id="class_code_2" name="class_code_2" placeholder="Enter Class Code 2">
-                    <button type="button" onclick="fetchCourseDetails('class_code_2', 'course_code_2', 'course_name_2')">Search</button>
-                    <p>Course Code: <span id="course_code_2">N/A</span></p>
-                    <p>Course Name: <span id="course_name_2">N/A</span></p>
-                </div>
+            <div class="form-group">
+                <label class="label" for="class_code_2">Class Code 2</label>
+                <select name="class_code_2" required>
+                    <option value="" disabled selected>Select a Class Code</option>
+                    <?php
+                    foreach ($class_codes as $class_code) {
+                        echo "<option value='" . htmlspecialchars($class_code) . "'>" . htmlspecialchars($class_code) . "</option>";
+                    }
+                    ?>
+                </select>
+            </div>
 
                 <!-- Class Code 3 -->
                 <div class="form-group">
-                    <label class="label" for="class_code_3">Class Code 3</label>
-                    <input type="text" id="class_code_3" name="class_code_3" placeholder="Enter Class Code 3">
-                    <button type="button" onclick="fetchCourseDetails('class_code_3', 'course_code_3', 'course_name_3')">Search</button>
-                    <p>Course Code: <span id="course_code_3">N/A</span></p>
-                    <p>Course Name: <span id="course_name_3">N/A</span></p>
-                </div>
+            <label class="label" for="class_code_3">Class Code 3</label>
+                <select name="class_code_3" required>
+                    <option value="" disabled selected>Select a Class Code</option>
+                    <?php
+                    foreach ($class_codes as $class_code) {
+                        echo "<option value='" . htmlspecialchars($class_code) . "'>" . htmlspecialchars($class_code) . "</option>";
+                    }
+                    ?>
+                </select>
+            </div>
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <button type="submit">Submit</button>
             </form>
