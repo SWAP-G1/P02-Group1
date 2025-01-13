@@ -75,9 +75,21 @@ select {
     width: 1125px; /* Match the width of the input fields */
     padding: 10px; /* Ensure consistent padding */
     margin-bottom: 15px;
+    background-color: white;
     border: 1px solid #ced4da;
     border-radius: 4px;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+select:hover {
+    background-color: #f0f0f0;
+    border-color: #686868;
+}
+
+
+select:focus {
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    background-color: #ffffff; /* White background when focused */
 }
 
 /* Inputs */
