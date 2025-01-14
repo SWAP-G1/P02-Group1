@@ -101,7 +101,7 @@ if (!$error_message) {
     $stmt->fetch();
     $stmt->close();
     if ($id_exists > 0) {
-        $error_message = "Error: Identification code already exists.";
+        $error_message = "Error: Identification code must not overlap. Ensure all identification codes are unique.";
     }
 }
 // Check if phone number already exists
