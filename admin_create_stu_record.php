@@ -99,10 +99,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->fetch();
         $stmt->close();
         if ($id_exists > 0) {
-            $error_message = "Error: Identification code already exists.";
+            $error_message = "Error: Identification code must not overlap. Ensure all identification codes are unique.";
         }
     }
-    
+
 // Proceed only if there are no errors
     if (!$error_message) {
     // Begin transaction
