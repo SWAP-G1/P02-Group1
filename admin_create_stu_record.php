@@ -90,6 +90,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+//check if identification code already exists
+    if (!$error_message) {
+        $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
+        $stmt->bind_param('i', $student_id_code);
+        $stmt->execute();
+        $stmt->bind_result($id_exists);
+        $stmt->fetch();
+        $stmt->close();
+        if ($id_exists > 0) {
+            $error_message = "Error: Identification code already exists.";
+        }
+    }
+    
 // Proceed only if there are no errors
     if (!$error_message) {
     // Begin transaction
