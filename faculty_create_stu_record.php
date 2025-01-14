@@ -92,7 +92,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error_message = "Error: Diploma code does not exist.";
         }
     }
-
+//check if identification code already exists
+if (!$error_message) {
+    $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
+    $stmt->bind_param('i', $student_id_code);
+    $stmt->execute();
+    $stmt->bind_result($id_exists);
+    $stmt->fetch();
+    $stmt->close();
+    if ($id_exists > 0) {
+        $error_message = "Error: Identification code already exists.";
+    }
+}
 // Check if phone number already exists
     if (!$error_message) {
         $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE phone_number = ?");
@@ -163,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <p style="color: red;"><?php echo $error_message; ?></p>
                 <button onclick="window.history.back()">Back</button>
             <?php endif; ?>
-        </div>
+        </div>z`
     </div>
 </body>
 </html>
