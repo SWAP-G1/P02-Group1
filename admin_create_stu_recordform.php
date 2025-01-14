@@ -27,8 +27,9 @@ if ($class_result && mysqli_num_rows($class_result) > 0) {
         $class_codes[] = $row['class_code'];
     }
 }
-$diploma_query = "SELECT diploma_code FROM diploma";
+$diploma_query = "SELECT diploma_code, diploma_name FROM diploma";
 $diploma_result = mysqli_query($con, $diploma_query);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +52,6 @@ $diploma_result = mysqli_query($con, $diploma_query);
             <a href="logout.php">Logout</a>
         </nav>
     </div>
-
     <div class="container">
         <div class="card">
             <h2>Student Profile Management</h2>
@@ -59,7 +59,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
         </div>
 
         <div class="card">
-            <h3>Student Profile Form</h3>
+            <h3>Create Student Profile Form</h3>
             <form method="POST" action="admin_create_stu_record.php">
                 <div class="form-group">
                     <label class="label" for="student_name">Student Name</label>
@@ -71,6 +71,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 </div>
                 <div class="form-group">
                     <label class="label" for="student_id_code">Student ID Code</label>
+                    <p>Student Email Format: Student ID + @student.xyz.sg</p>
                     <input type="text" name="student_id_code" placeholder="Enter Student ID Code" maxlength="4" required>
                 </div>
                 <div class="form-group">
@@ -80,7 +81,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                         <?php
                         if ($diploma_result && mysqli_num_rows($diploma_result) > 0) {
                             while ($row = mysqli_fetch_assoc($diploma_result)) {
-                                echo "<option value='" . htmlspecialchars($row['diploma_code']) . "'>" . htmlspecialchars($row['diploma_code']) . "</option>";
+                                echo "<option value='" . htmlspecialchars($row['diploma_code']) . "'>" . htmlspecialchars($row['diploma_name']) . "</option>";
                             }
                         }
                         ?>
@@ -96,9 +97,9 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     }
                     ?>
                 </select>
-            </div>
+                </div>
 
-            <div class="form-group">
+                <div class="form-group">
                 <label class="label" for="class_code_2">Class Code 2</label>
                 <select name="class_code_2" required>
                     <option value="" disabled selected>Select a Class Code</option>
@@ -108,11 +109,11 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     }
                     ?>
                 </select>
-            </div>
+                </div>
 
                 <!-- Class Code 3 -->
                 <div class="form-group">
-            <label class="label" for="class_code_3">Class Code 3</label>
+                <label class="label" for="class_code_3">Class Code 3</label>
                 <select name="class_code_3" required>
                     <option value="" disabled selected>Select a Class Code</option>
                     <?php
@@ -121,7 +122,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     }
                     ?>
                 </select>
-            </div>
+                </div>
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <button type="submit">Submit</button>
             </form>
@@ -129,22 +130,28 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
         <div class="card">
             <h3>Student Records</h3>
+            <button id="scrollToTop" class="button" onclick="scroll_to_top()">⬆ Back to Top</button>
+
             <?php
 
 // Prepare the SQL query to fetch student details and their associated class codes
 $stmt = $con->prepare("
     SELECT 
-        u.identification_code,       -- Fetch the unique ID  from user table
-        u.full_name,                 -- Fetch the full name from user table
-        u.phone_number,              -- Fetch the phone number from user table
-        s.class_code,                -- Fetch the class code from student table
-        s.diploma_code               -- Fetch the diploma code from user table
+        u.identification_code,
+        u.full_name,
+        u.phone_number,
+        s.class_code,
+        d.diploma_code,
+        d.diploma_name
     FROM 
-        user u                       -- The 'user' table stores user information
+        user u
     JOIN 
         student s ON u.identification_code = s.identification_code
-        -- Join 'user' and 'student' tables to combine student details with their class records
+    JOIN
+        diploma d ON s.diploma_code = d.diploma_code
 ");
+
+
 
 // Execute the prepared query
 $stmt->execute();
@@ -161,12 +168,13 @@ while ($row = $result->fetch_assoc()) {
 
     // Check if this student is already in the array
     if (!isset($students[$student_id])) {
-        // If not, initialize their record in the array to continue with processing
+        // Initialize their record in the array with all required fields
         $students[$student_id] = [
             'identification_code' => $row['identification_code'], // Store the student ID
             'full_name' => $row['full_name'],                     // Store the student's name
             'phone_number' => $row['phone_number'],               // Store the student's phone number
             'diploma_code' => $row['diploma_code'],               // Store the diploma code
+            'diploma_name' => $row['diploma_name'],               // Store the diploma name
             'class_code_1' => null,                               // Initialize the first class code as null
             'class_code_2' => null,                               // Initialize the second class code as null
             'class_code_3' => null,                               // Initialize the third class code as null
@@ -197,7 +205,7 @@ echo '<tr>
         <th>Class Code 1</th>        
         <th>Class Code 2</th>        
         <th>Class Code 3</th>        
-        <th>Diploma Code</th>        
+        <th>Diploma Name</th>        
         <th colspan="2">Operations</th> 
     </tr>';
 
@@ -205,7 +213,7 @@ echo '<tr>
 $stu_id_pattern = '/^\d{3}[A-Z]$/';
 
 foreach ($students as $student_id => $student) {
-    if (preg_match($stu_id_pattern, $student['identification_code'])) { //ensures only the students with the matching id format is displayed and exclude admins and faculty
+    if (preg_match($stu_id_pattern, $student['identification_code'])) { 
         echo '<tr>';
         echo '<td>' . $student['identification_code'] . '</td>';
         echo '<td>' . $student['full_name'] . '</td>';
@@ -213,18 +221,13 @@ foreach ($students as $student_id => $student) {
         echo '<td>' . $student['class_code_1'] . '</td>';
         echo '<td>' . $student['class_code_2'] . '</td>';
         echo '<td>' . $student['class_code_3'] . '</td>';
-        echo '<td>' . $student['diploma_code'] . '</td>';
+        echo '<td>' . $student['diploma_name'] . '</td>'; // Display the diploma name
         echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . $student['identification_code'] . '">Edit</a> </td>';
-        echo '<td>
-                <form action="admin_delete_stu_record.php" method="POST" style="display:inline;">
-                    <input type="hidden" name="student_id" value="' . $student['identification_code'] . '">
-                    <input type="hidden" name="csrf_token" value="' . $_SESSION['csrf_token'] . '">
-                    <button type="submit" onclick="return confirm(\'Are you sure you want to delete this student?\')">Delete</button>
-                </form>
-              </td>';
+        echo '<td> <a href="admin_delete_stu_record.php?student_id=' . $student['identification_code'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Delete</a> </td>';
         echo '</tr>';
     }
 }
+
 
 
 // End the HTML table
@@ -240,6 +243,17 @@ $con->close();
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
+<script>
+    let  scrollToTopButton = document.getElementById("scrollToTop");
+
+    function scroll_to_top() {
+    window.scrollTo({
+        top: 0,         // Scroll to the top
+        behavior: 'smooth' // Enable smooth scrolling
+    });
+}
+</script>
 
 </body>
+
 </html>
