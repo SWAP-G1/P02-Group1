@@ -1,5 +1,31 @@
 <?php
 session_start();
+// Define the session timeout duration (15 minutes)
+define('SESSION_TIMEOUT', 300); // 900 seconds = 15 minutes
+define('WARNING_TIME', 60); // 1 minute before session ends
+define('FINAL_WARNING_TIME', 5); // Final warning 5 seconds before logout
+
+// Function to check and handle session timeout
+function checkSessionTimeout() {
+    if (isset($_SESSION['last_activity'])) {
+        // Calculate the elapsed time since the last activity
+        $inactive_time = time() - $_SESSION['last_activity'];
+
+        // If the elapsed time exceeds the timeout duration, log out the user
+        if ($inactive_time > SESSION_TIMEOUT) {
+            session_unset(); // Remove all session variables
+            session_destroy(); // Destroy the session
+            header("Location: testlogin.php?timeout=1"); // Redirect to login page with timeout notice
+            exit();
+        }
+    }
+
+    // Update 'last_activity' timestamp
+    $_SESSION['last_activity'] = time();
+}
+
+// Call the session timeout check at the beginning
+checkSessionTimeout();
 $con = mysqli_connect("localhost", "root", "", "xyz polytechnic"); // Connect to database
 $error_message = "";
 
@@ -182,5 +208,31 @@ $con->close();
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
+<script>
+    // Remaining time in seconds (calculated in PHP)
+    const remainingTime = <?php echo $remaining_time; ?>;
+    const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends
+    const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 5 seconds before logout
+
+    // Notify user 1 minute before logout
+    if (remainingTime > warningTime) {
+        setTimeout(() => {
+            alert("You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in.");
+        }, (remainingTime - warningTime) * 1000); // Convert to milliseconds
+    }
+
+    // Final notification 5 seconds before logout
+    if (remainingTime > finalWarningTime) {
+        setTimeout(() => {
+            alert("You will be logged out in 5 seconds due to inactivity.");
+        }, (remainingTime - finalWarningTime) * 1000); // Convert to milliseconds
+    }
+
+    // Automatically log the user out when the session expires
+    setTimeout(() => {
+        window.location.href = "testlogin.php?timeout=1";
+    }, remainingTime * 1000); // Convert to milliseconds
+</script>
+
 </body>
 </html>
