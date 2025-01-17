@@ -44,8 +44,8 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (faculty role: 2)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
-    echo "<h2>Your session has expired. Please log in again.</h2>";
-    header("Refresh: 3; URL=testlogin.php");
+    $error_message = "Your session has expired. Please log in again.";
+    header("logout.php"); // Redirect to the login page after a delay
     exit();
 }
 
