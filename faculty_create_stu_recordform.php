@@ -180,7 +180,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
         <div class="card">
             <h3>Student Records</h3>
-            <button id="scrollToTop" class="button" onclick="scroll_to_top()">⬆ Back to Top</button>
+            <button id="scrollToTop" class="button" onclick="scroll_to_top()"><img src="scrollup.png" alt="Scroll to top"></button>
 
             <?php
 
