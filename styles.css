@@ -94,22 +94,31 @@ select:focus {
 
 #scrollToTop {
     position: fixed; /* Keeps the button in the same position in the viewport */
-    bottom: auto; /* Reset the default bottom positioning */
     top: 1000px; /* Adjust distance from the top of the viewport */
     right: 400px; /* Distance from the right edge of the viewport */
     z-index: 1000; /* Ensure it stays above other elements */
-    font-size: 14px;
-    padding: 10px 20px;
+    width: 70px; /* Set the button's width */
+    height: 70px; /* Set the button's height (same as width for circular shape) */
     background-color: #113f84; /* Matches your theme */
     color: #fff;
-    border-radius: 50px;
+    border-radius: 50%; /* Makes the button circular */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    display: block; /* Hidden until user scrolls */
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 #scrollToTop:hover {
     background-color: #0056b3;
+}
+
+#scrollToTop img {
+    width: 30px; /* Adjust the image size relative to the button */
+    height: auto; /* Maintain aspect ratio */
+    pointer-events: none; /* Ensure clicks pass through the image to the button */
 }
 
 /* Inputs */
