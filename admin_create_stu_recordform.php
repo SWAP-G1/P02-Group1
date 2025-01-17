@@ -1,6 +1,6 @@
 <?php
 session_start();
-define('SESSION_TIMEOUT', 70); // 600 seconds = 10 minutes
+define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
 
