@@ -1,8 +1,8 @@
 <?php
 session_start();
-define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
+define('SESSION_TIMEOUT', 70); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
-define('FINAL_WARNING_TIME', 5); // Final warning 5 seconds before logout
+define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
 
 // Function to check and handle session timeout
 function checkSessionTimeout() {
@@ -298,7 +298,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
         // Final notification 5 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                alert("You will be logged out in 5 seconds due to inactivity.");
+                alert("You will be logged out due to inactivity.");
             }, (remainingTime - finalWarningTime) * 1000); // Convert to milliseconds
         }
 
