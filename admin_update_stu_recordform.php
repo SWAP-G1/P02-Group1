@@ -46,7 +46,8 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (Admin role: 1)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
-    header("Location: testlogin.php");
+    $error_message = "Your session has expired. Please log in again.";
+    header("logout.php"); // Redirect to the login page after a delay
     exit();
 }
 
