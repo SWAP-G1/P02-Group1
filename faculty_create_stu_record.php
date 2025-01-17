@@ -24,7 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         strtoupper(htmlspecialchars($_POST["class_code_2"])),
         strtoupper(htmlspecialchars($_POST["class_code_3"])),
     ];
-    $diploma_name = htmlspecialchars($_POST["diploma_name"]); // Auto-capitalize
+    
+    $diploma_code = htmlspecialchars($_POST["diploma_code"]); // Auto-capitalize
+    
     // Validate name: must contain only alphabets (both uppercase and lowercase) and spaces
     if (!$error_message && !preg_match('/^[a-zA-Z ]+$/', $student_name)) {
         $error_message = "Error: Student name must only contain alphabets and spaces.";
@@ -55,15 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error_message = "Invalid ID code format for students. Ensure it is 3 digits followed by 1 uppercase letter.";
     }
 
-// Validate class codes: 4 characters, first 2 are uppercase letters, last 2 are digits
-
-
-// Validate diploma code: 3 to 4 uppercase letters
-    $pattern_diploma_code = '/^[A-Z]{3,4}$/'; // 3 to 4 uppercase letters
-    if (!$error_message && !preg_match($pattern_diploma_code, $diploma_code)) {
-        $error_message = "Invalid diploma code format. Ensure it is 3 to 4 uppercase letters.";
-    }
-
 // Check if class codes exist
     if (!$error_message) {
         foreach ($class_codes as $class_code) {
@@ -81,29 +74,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 // Check if diploma_code exists
-    if (!$error_message) {
-        $stmt = $con->prepare("SELECT COUNT(*) FROM diploma WHERE diploma_code = ?");
-        $stmt->bind_param('s', $diploma_code);
-        $stmt->execute();
-        $stmt->bind_result($diploma_exists);
-        $stmt->fetch();
-        $stmt->close();
-        if ($diploma_exists == 0) {
-            $error_message = "Error: Diploma code does not exist.";
-        }
-    }
-//check if identification code already exists
-if (!$error_message) {
-    $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
-    $stmt->bind_param('i', $student_id_code);
-    $stmt->execute();
-    $stmt->bind_result($id_exists);
-    $stmt->fetch();
-    $stmt->close();
-    if ($id_exists > 0) {
-        $error_message = "Error: Identification code must not overlap. Ensure all identification codes are unique.";
-    }
-}
+// Check if diploma_code exists
+
+
 // Check if phone number already exists
     if (!$error_message) {
         $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE phone_number = ?");
@@ -114,6 +87,19 @@ if (!$error_message) {
         $stmt->close();
         if ($phone_exists > 0) {
             $error_message = "Error: Phone number already exists.";
+        }
+    }
+
+//check if identification code already exists
+    if (!$error_message) {
+        $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
+        $stmt->bind_param('i', $student_id_code);
+        $stmt->execute();
+        $stmt->bind_result($id_exists);
+        $stmt->fetch();
+        $stmt->close();
+        if ($id_exists > 0) {
+            $error_message = "Error: Identification code must not overlap. Ensure all identification codes are unique.";
         }
     }
 
@@ -174,7 +160,10 @@ if (!$error_message) {
                 <p style="color: red;"><?php echo $error_message; ?></p>
                 <button onclick="window.history.back()">Back</button>
             <?php endif; ?>
-        </div>z`
+        </div>
     </div>
+    <footer class="footer">
+        <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
+    </footer>
 </body>
 </html>
