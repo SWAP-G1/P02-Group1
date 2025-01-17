@@ -3,7 +3,7 @@ session_start();
 // Define the session timeout duration (10 minutes)
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
-define('FINAL_WARNING_TIME', 3); // Final warning 5 seconds before logout
+define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
 
 // Function to check and handle session timeout
 function checkSessionTimeout() {
@@ -249,7 +249,7 @@ $con->close();
 
     // Automatically log the user out when the session expires
     setTimeout(() => {
-        window.location.href = "testlogin.php?timeout=1";
+        window.location.href = "logout.php";
     }, remainingTime * 1000); // Convert to milliseconds
 </script>
 
