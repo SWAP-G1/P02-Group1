@@ -10,18 +10,18 @@ function checkSessionTimeout() {
         // Calculate the elapsed time since the last activity
         $inactive_time = time() - $_SESSION['last_activity'];
 
-        // If the elapsed time exceeds the timeout duration, log out the user
+        // If the elapsed time exceeds the timeout duration, just return
         if ($inactive_time > SESSION_TIMEOUT) {
-            session_unset(); // Remove all session variables
-            session_destroy(); // Destroy the session
-            header("Location: testlogin.php?timeout=1"); // Redirect to login page with timeout notice
-            exit();
+            return; // Let JavaScript handle logout
         }
     }
 
     // Update 'last_activity' timestamp for session tracking
     $_SESSION['last_activity'] = time();
 }
+
+// Call the session timeout check at the beginning
+checkSessionTimeout();
 
 // Calculate remaining session time for the user
 $remaining_time = (isset($_SESSION['last_activity'])) 
@@ -303,7 +303,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
-            window.location.href = "testlogin.php?timeout=1";
+            window.location.href = "logout.php";
         }, remainingTime * 1000); // Convert to milliseconds
 
         // Scroll to top functionality
