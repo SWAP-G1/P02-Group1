@@ -44,8 +44,8 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (Admin role: 1)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
-    echo "<h2>Your session has expired. Please log in again.</h2>";
-    header("Refresh: 3; URL=testlogin.php");
+    $error_message = "Your session has expired. Please log in again.";
+    header("logout.php"); // Redirect to the login page after a delay
     exit();
 }
 
@@ -181,7 +181,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
         <div class="card">
             <h3>Student Records</h3>
             <button id="scrollToTop" class="button" onclick="scroll_to_top()"><img src="scrollup.png" alt="Scroll to top"></button>
-            
+
             <?php
 
             // Query to fetch student details along with class codes and course names
