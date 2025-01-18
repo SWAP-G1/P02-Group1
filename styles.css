@@ -94,11 +94,11 @@ select:focus {
 
 #scrollToTop {
     position: fixed; /* Keeps the button in the same position in the viewport */
-    top: 1000px; /* Adjust distance from the top of the viewport */
-    right: 400px; /* Distance from the right edge of the viewport */
+    top: 1050px; /* Adjust distance from the top of the viewport */
+    right: 70px; /* Distance from the right edge of the viewport */
     z-index: 1000; /* Ensure it stays above other elements */
-    width: 70px; /* Set the button's width */
-    height: 70px; /* Set the button's height (same as width for circular shape) */
+    width: 60px; /* Set the button's width */
+    height: 60px; /* Set the button's height (same as width for circular shape) */
     background-color: #113f84; /* Matches your theme */
     color: #fff;
     border-radius: 50%; /* Makes the button circular */
@@ -120,6 +120,7 @@ select:focus {
     height: auto; /* Maintain aspect ratio */
     pointer-events: none; /* Ensure clicks pass through the image to the button */
 }
+
 
 /* Inputs */
 input[type="text"], input[type="password"], textarea {
