@@ -45,7 +45,7 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 // Check if the user is logged in and has the correct role (Admin role: 1)
-if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
+if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
     header("Location: testlogin.php");
     exit();
 }
