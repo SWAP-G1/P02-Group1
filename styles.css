@@ -94,8 +94,8 @@ select:focus {
 
 #scrollToTop {
     position: fixed; /* Keeps the button in the same position in the viewport */
-    top: 1050px; /* Adjust distance from the top of the viewport */
-    right: 70px; /* Distance from the right edge of the viewport */
+    top: 68%; /* Adjust distance from the top of the viewport */
+    right: 3%; /* Distance from the right edge of the viewport */
     z-index: 1000; /* Ensure it stays above other elements */
     width: 60px; /* Set the button's width */
     height: 60px; /* Set the button's height (same as width for circular shape) */
