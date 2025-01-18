@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (!preg_match('/^\d{8}$/', $phone_number)) {
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Phone number must be exactly 8 digits."));
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Phone number must be exactly 8 numbers."));
         exit();
     }
 
