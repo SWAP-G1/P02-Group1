@@ -30,11 +30,10 @@ $remaining_time = (isset($_SESSION['last_activity']))
 
 // Establish a connection to the database
 $con = mysqli_connect("localhost", "root", "", "xyz polytechnic");
-$error_message = "";
 
 // Check for database connection errors
 if (!$con) {
-    $error_message = 'Could not connect: ' . mysqli_connect_errno();
+    die('Could not connect: ' . mysqli_connect_errno());
 }
 
 // Generate CSRF token if not already set
@@ -42,7 +41,7 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Check if the user is logged in and has the correct role (faculty role: 2)
+// Check if the user is logged in and has the correct role (faculty role: 1)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
     header("Location: testlogin.php");
     exit();
@@ -100,6 +99,27 @@ $diploma_result = mysqli_query($con, $diploma_query);
         <div class="card">
             <h2>Student Profile Management</h2>
             <p>Add and view student profiles.</p>
+            <?php
+            // If ?success=1 is set in the URL, display a success message
+            if (isset($_GET['success']) && $_GET['success'] == 1) {
+                echo '<p style="color: green; font-weight: bold;">Student record created successfully.</p>';
+            }
+
+            // If ?success=1 is set in the URL, display an update success message
+            if (isset($_GET['success']) && $_GET['success'] == 2) {
+                echo '<p style="color: green; font-weight: bold;">Student record updated successfully.</p>';
+            }
+
+            // If ?success=1 is set in the URL, display a delete message
+            if (isset($_GET['success']) && $_GET['success'] == 3) {
+                echo '<p style="color: green; font-weight: bold;">Student record deleted successfully.</p>';
+            }
+
+            // Check if an error parameter was passed
+            if (isset($_GET['error'])) {
+                echo '<p style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</p>';
+            }
+            ?>
         </div>
 
         <div class="card">
@@ -279,37 +299,61 @@ $diploma_result = mysqli_query($con, $diploma_query);
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
-
+    <div id="logoutWarningModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="logoutWarningMessage"></p>
+            <button id="logoutWarningButton">OK</button>
+        </div>
+    </div>
     <script>
         // Remaining time in seconds (calculated in PHP)
         const remainingTime = <?php echo $remaining_time; ?>;
         const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends
-        const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 5 seconds before logout
+        const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 3 seconds before logout
+
+        // Function to show the logout warning modal
+        function showLogoutWarning(message, redirectUrl = null) {
+            const modal = document.getElementById("logoutWarningModal");
+            const modalMessage = document.getElementById("logoutWarningMessage");
+            const modalButton = document.getElementById("logoutWarningButton");
+
+            modalMessage.innerText = message;
+            modal.style.display = "flex";
+
+            modalButton.onclick = function () {
+                modal.style.display = "none";
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            };
+        }
 
         // Notify user 1 minute before logout
         if (remainingTime > warningTime) {
             setTimeout(() => {
-                alert("You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in.");
-            }, (remainingTime - warningTime) * 1000); // Convert to milliseconds
+                showLogoutWarning(
+                    "You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in."
+                );
+            }, (remainingTime - warningTime) * 1000);
         }
 
-        // Final notification 5 seconds before logout
+        // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                alert("You will be logged out due to inactivity.");
-            }, (remainingTime - finalWarningTime) * 1000); // Convert to milliseconds
+                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+            }, (remainingTime - finalWarningTime) * 1000);
         }
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
             window.location.href = "logout.php";
-        }, remainingTime * 1000); // Convert to milliseconds
+        }, remainingTime * 1000);
 
         // Scroll to top functionality
         function scroll_to_top() {
             window.scrollTo({
-                top: 0,         // Scroll to the top
-                behavior: 'smooth' // Enable smooth scrolling
+                top: 0,
+                behavior: 'smooth'
             });
         }
     </script>
