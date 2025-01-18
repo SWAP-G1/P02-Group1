@@ -31,12 +31,10 @@ $remaining_time = (isset($_SESSION['last_activity']))
 
 // Establish a connection to the database
 $con = mysqli_connect("localhost", "root", "", "xyz polytechnic");
-$error_message = "";
 
 // Check for database connection errors
 if (!$con) {
-    $error_message = 'Could not connect: ' . mysqli_connect_errno();
-    die($error_message);
+    die('Could not connect: ' . mysqli_connect_errno());
 }
 
 // Generate CSRF token if not already set
@@ -44,7 +42,7 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Check if the user is logged in and has the correct role (Admin role: 1)
+// Check if the user is logged in and has the correct role (admin role: 1)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
     header("Location: testlogin.php");
     exit();
@@ -107,15 +105,17 @@ if (!empty($student_id)) {
 
     // If no classes are found, set an error message
     if (empty($existing_classes)) {
-        $error_message = "Error: Student record not found.";
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Error: Student record not found."));
+        exit();
     }
-}
-
-// Validate student ID format (3 digits followed by 1 uppercase letter)
-$pattern_student_id = '/^\d{3}[A-Z]$/';
-if (!preg_match($pattern_student_id, $student_id)) {
-    $error_message = "Error: Invalid student ID format.";
-}
+    
+    // Validate student ID format (3 digits followed by 1 uppercase letter)
+    $pattern_student_id = '/^\d{3}[A-Z]$/';
+    if (!preg_match($pattern_student_id, $student_id)) {
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Error: Invalid student ID format."));
+        exit();
+    }
+}    
 
 // Close the database connection
 $con->close();
@@ -145,10 +145,16 @@ $con->close();
     <div class="container">
         <div class="card">
             <h2>Update Student Record</h2>
-            <?php if (!empty($error_message)): ?>
-                <p style="color: red;"><?php echo $error_message; ?></p>
-                <button onclick="window.history.back()">Back</button>
-            <?php else: ?>
+            <?php
+            // Check if an error parameter was passed
+            if (isset($_GET['error'])) {
+                echo '<p style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</p>';
+            }
+            // If ?success=1 is set in the URL, display an update success message
+            if (isset($_GET['success']) && $_GET['success'] == 2) {
+                echo '<p style="color: green; font-weight: bold;">Student record updated successfully.</p>';
+            }
+            ?>
                 <form method="POST" action="admin_update_stu_record.php?student_id=<?php echo htmlspecialchars($student_id); ?>">
                     <div class="form-group">
                         <label class="label" for="student_name">Student Name</label>
@@ -220,38 +226,56 @@ $con->close();
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <button type="submit">Update Record</button>
                 </form>
-            <?php endif; ?>
         </div>
     </div>
 
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
-<script>
-    // Remaining time in seconds (calculated in PHP)
-    const remainingTime = <?php echo $remaining_time; ?>;
-    const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends
-    const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 5 seconds before logout
+    <script>
+        // Remaining time in seconds (calculated in PHP)
+        const remainingTime = <?php echo $remaining_time; ?>;
+        const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends
+        const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 3 seconds before logout
 
-    // Notify user 1 minute before logout
-    if (remainingTime > warningTime) {
+        // Function to show the logout warning modal
+        function showLogoutWarning(message, redirectUrl = null) {
+            const modal = document.getElementById("logoutWarningModal");
+            const modalMessage = document.getElementById("logoutWarningMessage");
+            const modalButton = document.getElementById("logoutWarningButton");
+
+            modalMessage.innerText = message;
+            modal.style.display = "flex";
+
+            modalButton.onclick = function () {
+                modal.style.display = "none";
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            };
+        }
+
+        // Notify user 1 minute before logout
+        if (remainingTime > warningTime) {
+            setTimeout(() => {
+                showLogoutWarning(
+                    "You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in."
+                );
+            }, (remainingTime - warningTime) * 1000);
+        }
+
+        // Final notification 3 seconds before logout
+        if (remainingTime > finalWarningTime) {
+            setTimeout(() => {
+                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+            }, (remainingTime - finalWarningTime) * 1000);
+        }
+
+        // Automatically log the user out when the session expires
         setTimeout(() => {
-            alert("You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in.");
-        }, (remainingTime - warningTime) * 1000); // Convert to milliseconds
-    }
-
-    // Final notification 5 seconds before logout
-    if (remainingTime > finalWarningTime) {
-        setTimeout(() => {
-            alert("You will be logged out due to inactivity.");
-        }, (remainingTime - finalWarningTime) * 1000); // Convert to milliseconds
-    }
-
-    // Automatically log the user out when the session expires
-    setTimeout(() => {
-        window.location.href = "logout.php";
-    }, remainingTime * 1000); // Convert to milliseconds
-</script>
+            window.location.href = "logout.php";
+        }, remainingTime * 1000);
+    </script>
 
 </body>
 </html>
