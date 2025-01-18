@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validate phone number: must be exactly 8 digits
     if (!preg_match('/^\d{8}$/', $upd_phone_number)) {
-        header("Location: admin_update_stu_recordform.php?error=" . urlencode("Phone number must be exactly 8 digits.") . "&student_id=" . urlencode($student_id_code));
+        header("Location: admin_update_stu_recordform.php?error=" . urlencode("Phone number must be exactly 8 numbers.") . "&student_id=" . urlencode($student_id_code));
         exit();
     }
 
