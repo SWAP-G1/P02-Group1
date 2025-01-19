@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 04, 2025 at 05:06 PM
+-- Generation Time: Jan 19, 2025 at 10:47 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -99,6 +99,29 @@ CREATE TABLE `faculty` (
   `full_name` varchar(50) NOT NULL,
   `class_code` varchar(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_reset`
+--
+
+CREATE TABLE `password_reset` (
+  `id` int(11) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `password_reset`
+--
+
+INSERT INTO `password_reset` (`id`, `email`, `token`, `created_at`) VALUES
+(1, 'hamizan@gmail.com', '0406ad26b2104f4fc09561c3d671a6797fc9986bcac0f2d25334f08f93eab3326824f33e33a5606800612c1cd91be77ddd36', '2025-01-19 07:53:27'),
+(2, 'hamizvn@gmail.com', '402385a0f8b884e4d006508ef92e938d63d90ed5b4f24e2a85fc39bee65330abe4e4e0545360f9011324eda531313965d016', '2025-01-19 07:54:17'),
+(8, 'hamizvn@gmail.com', '90c6cad9fb07a736d863ad97cd717710e0a8d4f710806b7f1fe353026e3d21bbd9b265b42e0cc3111b855817b50a6a235da0', '2025-01-19 09:04:08'),
+(10, 'hamizvn@gmail.com', '98b6c13ef902eb87f120a69a16566611f0d42048676ac5cc2457c2709b891a52aed0201bdfc693e5929458c6dc82743bcfc5', '2025-01-19 09:05:04');
 
 -- --------------------------------------------------------
 
@@ -211,7 +234,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`identification_code`, `email`, `password`, `role_id`, `phone_number`, `full_name`, `login_tracker`) VALUES
-('239B', 'hamizan@gmail.com', '$2y$10$q9/IW9y8vIbZwz.YN8snTO5vKO/gtD61dCeFIvnJQa0gB2mfMVDx6', 3, 82424436, 'HAMIZAN BIN ALWEE', 0),
+('239B', 'hamizvn@gmail.com', '$2y$10$NBrZv5FEayqPrhdVhwcxDekb.031PvD86laHROsMX/ipQhZFX2k.m', 3, 82424436, 'HAMIZAN BIN ALWEE', 1),
 ('A001', 'admin@gmail.com', '$2y$10$oeRWBpo3K7kGG814fCE7KuquNTg9lP6jqjZkWc/LPKr9F7U1jBzc.', 1, 93893589, 'ADMIN', 0),
 ('F223', 'fac2@gmail.com', '$2y$10$jSwwiX7ZYZq5AH.JG.4WmeL4d2NLGXoir72.VBJkHT1NzpDsoJraW', 2, 12343, 'AGUS SALIM', 0),
 ('F224', 'fac@gmail.com', '$2y$10$T7ZrKH06qdFgX5e/kC6e2uxBdVI4MSwYqd8RJui6KCU.mRGio2sdK', 2, 93893588, 'RAPHAEL FOO', 0);
@@ -251,6 +274,12 @@ ALTER TABLE `faculty`
   ADD KEY `email` (`email`),
   ADD KEY `full_name` (`full_name`),
   ADD KEY `class_code` (`class_code`);
+
+--
+-- Indexes for table `password_reset`
+--
+ALTER TABLE `password_reset`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `role`
@@ -304,6 +333,12 @@ ALTER TABLE `user`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `password_reset`
+--
+ALTER TABLE `password_reset`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `semester_gpa_to_course_code`
