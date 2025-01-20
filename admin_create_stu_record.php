@@ -113,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $con->prepare("INSERT INTO `user` (identification_code, email, phone_number, full_name, role_id, password) VALUES (?, ?, ?, ?, ?, ?)");
     $role_id = 3;
     $default_password = password_hash("xyzpassword123!" . $student_id_code, PASSWORD_DEFAULT);
-    $email = $student_id_code . "@student.xyz.sg";
+    $email = $student_id_code . "@gmail.com";
     $stmt->bind_param("ssissi", $student_id_code, $email, $phone_number, $student_name, $role_id, $default_password);
 
     if (!$stmt->execute()) {
