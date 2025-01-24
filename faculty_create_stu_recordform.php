@@ -298,8 +298,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
-    </footer>
-    <div id="logoutWarningModal" class="modal" style="display: none;">
+        <div id="logoutWarningModal" class="modal" style="display: none;">
         <div class="modal-content">
             <p id="logoutWarningMessage"></p>
             <button id="logoutWarningButton">OK</button>
@@ -343,6 +342,12 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
+        setTimeout(function() {
+        const messageElement = document.getElementById('message');
+        if (messageElement) {
+            messageElement.style.display = 'none';
+        }
+        }, 10000);
 
         // Automatically log the user out when the session expires
         setTimeout(() => {

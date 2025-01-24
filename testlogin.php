@@ -10,19 +10,19 @@ if (!$con) {
 // Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
-    $form_identification_code = isset($_POST['identification_code']) ? htmlspecialchars($_POST['identification_code']) : "";
+    $form_email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : "";
     $form_password = isset($_POST['password']) ? $_POST['password'] : "";
 
     // Check for empty fields
-    if (empty($form_identification_code) || empty($form_password)) {
-        echo "<h2>Identification Code and Password fields cannot be empty. Please try again</h2>";
+    if (empty($form_email) || empty($form_password)) {
+        echo "<h2>Email and Password fields cannot be empty. Please try again</h2>";
         header("Refresh: 2; URL=testlogin.php");
         exit();
     }
 
     // Use a prepared statement to fetch the user
-    $stmt = $con->prepare("SELECT * FROM user WHERE identification_code = ?");
-    $stmt->bind_param("s", $form_identification_code);
+    $stmt = $con->prepare("SELECT * FROM user WHERE email = ?");
+    $stmt->bind_param("s", $form_email);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['session_full_name'] = $row['full_name'];
             $_SESSION['session_role'] = $row['role_id'];
 
-            // Role-based redirection
+            // Role-based redirection with student ID passed in URL
             if ($row['role_id'] == 1) { // Admin
                 header("Location: admin_dashboard.php");
                 exit();
@@ -43,7 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: faculty_dashboard.php");
                 exit();
             } elseif ($row['role_id'] == 3) { // Student
-                header("Location: stu_dashboard.php");
+                $student_id_code = urlencode($row['identification_code']);
+                $csrf_token = urlencode($_SESSION['csrf_token']);
+                header("Location: student_profile.php?student_id={$student_id_code}&csrf_token={$csrf_token}");
                 exit();
             } else {
                 echo "<h2>Invalid role detected. Contact administrator.</h2>";
@@ -69,6 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 mysqli_close($con);
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,8 +95,8 @@ mysqli_close($con);
             <h2 class="text-center">Login</h2>
             <form method="POST" action="testlogin.php">
                 <div class="form-group">
-                    <label class="label" for="identification_code">Username</label>
-                    <input type="text" id="identification_code" name="identification_code" placeholder="Enter your username" required>
+                    <label class="label" for="email">Email</label>
+                    <input type="text" id="email" name="email" placeholder="Enter your email" required>
                 </div>
                 <div class="form-group">
                      <label class="label" for="password">Password</label>

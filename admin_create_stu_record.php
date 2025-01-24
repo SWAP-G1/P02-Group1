@@ -45,8 +45,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    if (count($class_codes) !== count(array_unique($class_codes))) {
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Class codes must be unique."));
+    $nil_class_codes = array_filter($class_codes, function ($code) {
+        return $code !== "NIL";
+    });
+    
+    if (count($nil_class_codes) !== count(array_unique($nil_class_codes))) {
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Class codes must be unique, except for 'NIL'."));
         exit();
     }
 
@@ -78,18 +82,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check if all class codes exist in the `class` table
     foreach ($class_codes as $class_code) {
+        // Validate format
+        if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
+            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid class code format. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
+            exit();
+        }
+    
+        // Check existence in the database
         $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
-        $stmt->bind_param("s", $class_code);
+        $stmt->bind_param('s', $class_code);
         $stmt->execute();
         $stmt->bind_result($class_exists);
         $stmt->fetch();
         $stmt->close();
-
+    
         if ($class_exists == 0) {
-            header("Location: admin_create_stu_recordform.php?error=" . urlencode("Class $class_code does not exist."));
-            exit();
+            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
+            exit();         
         }
     }
+    
 
     // Check if diploma code exists
     $stmt = $con->prepare("SELECT COUNT(*) FROM diploma WHERE diploma_code = ?");
@@ -113,11 +125,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $con->prepare("INSERT INTO `user` (identification_code, email, phone_number, full_name, role_id, password) VALUES (?, ?, ?, ?, ?, ?)");
     $role_id = 3;
     $default_password = password_hash("xyzpassword123!" . $student_id_code, PASSWORD_DEFAULT);
-    $email = $student_id_code . "@gmail.com";
-    $stmt->bind_param("ssissi", $student_id_code, $email, $phone_number, $student_name, $role_id, $default_password);
+    $email = $student_id_code . "@student.xyz.sg";
+    $stmt->bind_param("ssisis", $student_id_code, $email, $phone_number, $student_name, $role_id, $default_password);
 
     if (!$stmt->execute()) {
-        $success = false;
+        $success = false;   
         $con->rollback();
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Error inserting into `user` table: " . $stmt->error));
         exit();

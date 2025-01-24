@@ -16,6 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     // Retrieve and sanitize inputs
     // Retrieve and sanitize inputs
+    $upd_student_id_code = htmlspecialchars($_POST["upd_student_id_code"]);
     $upd_student_name = htmlspecialchars($_POST["upd_student_name"]); // Updated student name
     $upd_phone_number = htmlspecialchars($_POST["upd_phone_number"]); // Updated phone number
     $upd_diploma_code = strtoupper(htmlspecialchars($_POST["upd_diploma_code"])); // Updated diploma code
@@ -25,8 +26,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         strtoupper(htmlspecialchars($_POST["upd_class_code_3"] ?? '')),
     ];
     $student_id_code = strtoupper(htmlspecialchars($_GET["student_id"])); // Get the student ID from the query string
-
-    // Validate phone number: must be exactly 8 digits
+    if (empty($upd_student_name) || empty($upd_student_id_code) || empty($upd_phone_number) || empty($upd_diploma_code) ||
+        empty($upd_class_codes[0]) || empty($upd_class_codes[1]) || empty($upd_class_codes[2])) {
+        header("Location: admin_update_stu_recordform.php?error=" . urlencode("All fields are required.") . "&student_id=" . urlencode($student_id_code));
+        exit();
+    }
+    // Validate phone number: must be exactly 8 numbers
     if (!preg_match('/^\d{8}$/', $upd_phone_number)) {
         header("Location: admin_update_stu_recordform.php?error=" . urlencode("Phone number must be exactly 8 numbers.") . "&student_id=" . urlencode($student_id_code));
         exit();
@@ -45,14 +50,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Validate class codes: 4 characters, first 2 are uppercase letters, last 2 are digits
-    $pattern_class_code = '/^[A-Z]{2}\d{2}$/';
-    foreach ($upd_class_codes as $class_code) {
-        if ($class_code && !preg_match($pattern_class_code, $class_code)) {
+// Check if class codes exist in the database, but skip validation for "Nil"
+    foreach ($class_codes as $class_code) {
+        // Validate format
+        if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
             header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid class code format. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
             exit();
         }
+
+        // Check existence in the database
+        $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
+        $stmt->bind_param('s', $class_code);
+        $stmt->execute();
+        $stmt->bind_result($class_exists);
+        $stmt->fetch();
+        $stmt->close();
+
+        if ($class_exists == 0) {
+            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
+            exit();         
+        }
     }
+
 
     // Validate diploma code: must be 3-4 uppercase letters
     $pattern_diploma_code = '/^[A-Z]{3,4}$/';
@@ -62,27 +81,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Ensure all class codes are unique
-    if (count(array_filter($upd_class_codes)) !== count(array_unique(array_filter($upd_class_codes)))) {
-        header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class codes must not overlap. Ensure all class codes are unique.") . "&student_id=" . urlencode($student_id_code));
+    $nil_class_codes = array_filter($upd_class_codes, function ($code) {
+        return $code !== "NIL";
+    });
+    
+    if (count($nil_class_codes) !== count(array_unique($nil_class_codes))) {
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Class codes must be unique, except for 'NIL'."));
         exit();
     }
 
     // Check if class codes exist in the database
-    foreach ($upd_class_codes as $class_code) {
-        if ($class_code) {
-            $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
-            $stmt->bind_param('s', $class_code);
-            $stmt->execute();
-            $stmt->bind_result($class_exists);
-            $stmt->fetch();
-            $stmt->close();
+// Validate class codes: allow "Nil" or 4-character codes with 2 letters followed by 2 digits
 
-            if ($class_exists == 0) {
-                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
-                exit();
-            }
-        }
-    }
+
+
 
     // Check if diploma code exists in the database
     $stmt = $con->prepare("SELECT COUNT(*) FROM diploma WHERE diploma_code = ?");

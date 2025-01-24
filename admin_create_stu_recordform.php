@@ -102,22 +102,22 @@ $diploma_result = mysqli_query($con, $diploma_query);
             <?php
             // If ?success=1 is set in the URL, display a success message
             if (isset($_GET['success']) && $_GET['success'] == 1) {
-                echo '<p style="color: green; font-weight: bold;">Student record created successfully.</p>';
+                echo '<div id="message" style="color: green; font-weight: bold;">Student record created successfully.</div>';
             }
 
             // If ?success=1 is set in the URL, display an update success message
             if (isset($_GET['success']) && $_GET['success'] == 2) {
-                echo '<p style="color: green; font-weight: bold;">Student record updated successfully.</p>';
+                echo '<div id="message" style="color: green; font-weight: bold;">Student record updated successfully.</div>';
             }
 
             // If ?success=1 is set in the URL, display a delete message
             if (isset($_GET['success']) && $_GET['success'] == 3) {
-                echo '<p style="color: green; font-weight: bold;">Student record deleted successfully.</p>';
+                echo '<div id="message" style="color: green; font-weight: bold;">Student record deleted successfully.</div>';
             }
 
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<p style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</p>';
+                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>
@@ -127,20 +127,20 @@ $diploma_result = mysqli_query($con, $diploma_query);
             <form method="POST" action="admin_create_stu_record.php">
                 <div class="form-group">
                     <label class="label" for="student_name">Student Name</label>
-                    <input type="text" name="student_name" placeholder="Enter Student Name" required>
+                    <input type="text" name="student_name" placeholder="Enter Student Name" >
                 </div>
                 <div class="form-group">
                     <label class="label" for="phone_number">Phone Number</label>
-                    <input type="text" name="phone_number" placeholder="Enter Phone Number" maxlength="8" required>
+                    <input type="text" name="phone_number" placeholder="Enter Phone Number" maxlength="8" >
                 </div>
                 <div class="form-group">
                     <label class="label" for="student_id_code">Student ID Code</label>
                     <p>Student Email Format: Student ID + @student.xyz.sg</p>
-                    <input type="text" name="student_id_code" placeholder="Enter Student ID Code" maxlength="4" required>
+                    <input type="text" name="student_id_code" placeholder="Enter Student ID Code" maxlength="4" >
                 </div>
                 <div class="form-group">
                     <label class="label" for="diploma_code">Diploma Name</label>
-                    <select name="diploma_code" required>
+                    <select name="diploma_code" >
                         <option value="" disabled selected>Select a Diploma Name</option>
                         <?php
                         if ($diploma_result && mysqli_num_rows($diploma_result) > 0) {
@@ -153,7 +153,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 </div>
                 <div class="form-group">
                     <label class="label" for="class_code_1">Class Code 1</label>
-                    <select name="class_code_1" required>
+                    <select name="class_code_1" >
                         <option value="" disabled selected>Select a Class Code</option>
                         <?php
                         foreach ($class_codes as $class) {
@@ -167,7 +167,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
                 <div class="form-group">
                     <label class="label" for="class_code_2">Class Code 2</label>
-                    <select name="class_code_2" required>
+                    <select name="class_code_2" >
                         <option value="" disabled selected>Select a Class Code</option>
                         <?php
                         foreach ($class_codes as $class) {
@@ -181,7 +181,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
                 <div class="form-group">
                     <label class="label" for="class_code_3">Class Code 3</label>
-                    <select name="class_code_3" required>
+                    <select name="class_code_3" >
                         <option value="" disabled selected>Select a Class Code</option>
                         <?php
                         foreach ($class_codes as $class) {
@@ -344,6 +344,12 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
+        setTimeout(function() {
+        const messageElement = document.getElementById('message');
+        if (messageElement) {
+            messageElement.style.display = 'none';
+        }
+        }, 10000);
 
         // Automatically log the user out when the session expires
         setTimeout(() => {

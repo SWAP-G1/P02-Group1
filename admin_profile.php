@@ -1,5 +1,5 @@
 <?php
-session_start(); // Start the session
+session_start();
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
@@ -9,13 +9,11 @@ function checkSessionTimeout() {
     if (isset($_SESSION['last_activity'])) {
         // Calculate the elapsed time since the last activity
         $inactive_time = time() - $_SESSION['last_activity'];
-
-        // If the elapsed time exceeds the timeout duration, just return
         if ($inactive_time > SESSION_TIMEOUT) {
-            return; // Let JavaScript handle logout
+            header("Location: logout.php"); // Redirect to logout
+            exit();
         }
     }
-
     // Update 'last_activity' timestamp for session tracking
     $_SESSION['last_activity'] = time();
 }
@@ -27,84 +25,125 @@ checkSessionTimeout();
 $remaining_time = (isset($_SESSION['last_activity'])) 
     ? SESSION_TIMEOUT - (time() - $_SESSION['last_activity']) 
     : SESSION_TIMEOUT;
-$con = mysqli_connect("localhost","root","","xyz polytechnic"); //connect to database
-if (!$con){
-	die('Could not connect: ' . mysqli_connect_errno()); //return error is connect fail
+
+// Establish a connection to the database
+$con = mysqli_connect("localhost", "root", "", "xyz polytechnic");
+
+// Check for database connection errors
+if (!$con) {
+    die('Could not connect: ' . mysqli_connect_error());
 }
 
-// Check if the user is logged in and has the correct role
-if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
-    // Redirect to login page if the user is not logged in or not a faculty
+// Generate CSRF token if not already set
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Check if the user is logged in and has the correct role (admin role: 2)
+if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
     header("Location: testlogin.php");
     exit();
 }
 
-$full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
-$identification_code = isset($_SESSION['session_identification_code']) ? $_SESSION['session_identification_code'] : "";
+// Fetch admin ID from the session
+$admin_id_code = $_SESSION['session_identification_code'] ?? "";
 
+if (empty($admin_id_code)) {
+    header("Location: testlogin.php?error=" . urlencode("Session expired. Please log in again."));
+    exit();
+}
+
+// Query to fetch admin details and assigned classes, courses, and diplomas
+$query = "
+    SELECT 
+        u.full_name, 
+        u.phone_number, 
+        u.email, 
+        u.identification_code
+    FROM user u
+    WHERE u.identification_code = ?
+";
+
+
+$stmt = $con->prepare($query);
+$stmt->bind_param('s', $admin_id_code);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$admin_data = [];
+while ($row = $result->fetch_assoc()) {
+    $admin_data[] = $row;
+}
+$stmt->close();
+
+if (empty($admin_data)) {
+    $error_message = "No admin records found.";
+}
+
+// Close the database connection
+$con->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
+    <title>Admin Profile</title>
+    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
-    <title>Faculty Dashboard</title>
 </head>
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+    <div class="navbar">
         <div class="navbar-brand">
             <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
-            <h1>Polytechnic Management</h1>
+            <h1>XYZ Polytechnic Management</h1>
         </div>
-        <div class="logout-button">
+        <nav>
+            <a href="admin_dashboard.php">Home</a>
             <a href="logout.php">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <img src="user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
+            <h2 style="text-align: center;">Admin Profile</h2>
+            <?php if (!empty($admin_data)): ?>
+                <table class="profile-table" border="1" bgcolor="white" align="center">
+                    <tr>
+                        <th>Full Name</th>
+                        <td><?php echo htmlspecialchars($admin_data[0]['full_name']); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Phone Number</th>
+                        <td><?php echo htmlspecialchars($admin_data[0]['phone_number']); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Identification Code</th>
+                        <td><?php echo htmlspecialchars($admin_data[0]['identification_code']); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td><?php echo htmlspecialchars($admin_data[0]['email']); ?></td>
+                    </tr>
+                </table>
+            <?php else: ?>
+                <p style="text-align: center; color: red;"><?php echo $error_message ?? "No data available."; ?></p>
+            <?php endif; ?>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="forget_password.php">
+                    <button type="button" class="btn">Change Password</button>
+                </a>
+            </div>
         </div>
-    </nav>
-
-    <!-- Welcome Message -->
-    <div class="welcome-message" style="text-align: center; margin: 8px;">
-        <h2>Welcome <?php echo htmlspecialchars($full_name); ?>, <?php echo htmlspecialchars($identification_code); ?></h2>
     </div>
 
-    <!-- Faculty Dashboard Content -->
-    <div class="card-grid-container">
-    <!-- User Management Widget -->
-    <a href="faculty_create_stu_recordform.php" class="widget-card">
-        <h2>Student Management</h2>
-        <p>Manage students and their details here.</p>
-    </a>
-
-    <!-- Course Management Widget -->
-    <a href="faculty_course_create_form.php" class="widget-card">
-        <h2>Course Management</h2>
-        <p>Manage courses and their details here.</p>
-    </a>
-
-    <!-- Class Management Widget -->
-    <a href="faculty_class_create_form.php" class="widget-card">
-        <h2>Class Management</h2>
-        <p>Manage class schedules and related info here.</p>
-    </a>
-
-    <!-- Grades Management Widget -->
-    <a href="grades_management.php" class="widget-card">
-        <h2>Grades Management</h2>
-        <p>Manage and view student grades here.</p>
-    </a>
-    <a href="faculty_profile.php" class="widget-card">
-        <h2>Profile</h2>
-        <p>View your details here.</p>
-    </a>
-    </div>
-
-    <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2024 XYZ Polytechnic Management. All Rights Reserved.</p>
+        <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
+
     <div id="logoutWarningModal" class="modal" style="display: none;">
         <div class="modal-content">
             <p id="logoutWarningMessage"></p>

@@ -165,6 +165,11 @@ $con->close();
                         <input type="text" name="upd_phone_number" maxlength="8" value="<?php echo htmlspecialchars($phone_number); ?>" required>
                     </div>
                     <div class="form-group">
+                        <label class="label" for="student_id_code">Student ID Code</label>
+                        <p>Student Email Format: Student ID + @student.xyz.sg</p>
+                        <input type="text" name="upd_student_id_code" placeholder="Enter Student ID Code" maxlength="4" value="<?php echo htmlspecialchars($student_id); ?>" >
+                    </div>
+                    <div class="form-group">
                         <label class="label" for="diploma_code">Diploma Name</label>
                         <select name="upd_diploma_code" required>
                             <option value="" disabled>Select a Diploma Name</option>
@@ -232,6 +237,12 @@ $con->close();
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
+    <div id="logoutWarningModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="logoutWarningMessage"></p>
+            <button id="logoutWarningButton">OK</button>
+        </div>
+    </div>
     <script>
         // Remaining time in seconds (calculated in PHP)
         const remainingTime = <?php echo $remaining_time; ?>;
@@ -270,12 +281,25 @@ $con->close();
                 showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
+        setTimeout(function() {
+        const messageElement = document.getElementById('message');
+        if (messageElement) {
+            messageElement.style.display = 'none';
+        }
+        }, 10000);
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
             window.location.href = "logout.php";
         }, remainingTime * 1000);
-    </script>
 
+        // Scroll to top functionality
+        function scroll_to_top() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    </script>
 </body>
 </html>

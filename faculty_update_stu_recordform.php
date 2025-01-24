@@ -232,6 +232,12 @@ $con->close();
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
+    <div id="logoutWarningModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="logoutWarningMessage"></p>
+            <button id="logoutWarningButton">OK</button>
+        </div>
+    </div>
     <script>
         // Remaining time in seconds (calculated in PHP)
         const remainingTime = <?php echo $remaining_time; ?>;
@@ -270,12 +276,25 @@ $con->close();
                 showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
+        setTimeout(function() {
+        const messageElement = document.getElementById('message');
+        if (messageElement) {
+            messageElement.style.display = 'none';
+        }
+        }, 10000);
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
             window.location.href = "logout.php";
         }, remainingTime * 1000);
-    </script>
 
+        // Scroll to top functionality
+        function scroll_to_top() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    </script>
 </body>
 </html>
