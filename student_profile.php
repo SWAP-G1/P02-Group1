@@ -43,7 +43,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (Admin role: 1)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 3) {
-    header("Location: testlogin.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -89,18 +89,18 @@ $con->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/SWAP/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src="../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-            <a href="logout.php">Logout</a>
+            <a href="../logout.php">Logout</a>
         </nav>
     </div>
 
@@ -208,7 +208,7 @@ $con->close();
         // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+                showLogoutWarning("You will be logged out due to inactivity.", "../logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
         setTimeout(function() {
@@ -220,7 +220,7 @@ $con->close();
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
-            window.location.href = "logout.php";
+            window.location.href = "../logout.php";
         }, remainingTime * 1000);
 
         // Scroll to top functionality

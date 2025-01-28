@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$con) {
         die('Could not connect: ' . mysqli_connect_errno());
     }
+
     // Retrieve form data and sanitize inputs
     $student_name = htmlspecialchars(trim($_POST["student_name"]));
     $phone_number = htmlspecialchars(trim($_POST["phone_number"]));
@@ -24,9 +25,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $diploma_code = htmlspecialchars(trim($_POST["diploma_code"]));
 
     // Validation
-    if (empty($student_name) || empty($phone_number) || empty($student_id_code) || empty($diploma_code) ||
-        empty($class_codes[0]) || empty($class_codes[1]) || empty($class_codes[2])) {
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("All fields are required."));
+    if (empty($student_name) || empty($phone_number) || empty($student_id_code) || empty($diploma_code)) {
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("All fields except class codes are required."));
         exit();
     }
 
@@ -45,15 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    $nil_class_codes = array_filter($class_codes, function ($code) {
-        return $code !== "NIL";
-    });
-    
-    if (count($nil_class_codes) !== count(array_unique($nil_class_codes))) {
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Class codes must be unique, except for 'NIL'."));
-        exit();
-    }
-
     // Check for existing phone number
     $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE phone_number = ?");
     $stmt->bind_param("s", $phone_number);
@@ -66,7 +57,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Phone number already exists."));
         exit();
     }
-
+    $non_null_class_codes = array_filter($class_codes);
+    if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Ensure that all class codes are unique."));
+        exit();
+    }
     // Check for existing student ID
     $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
     $stmt->bind_param("s", $student_id_code);
@@ -80,28 +75,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Check if all class codes exist in the `class` table
+    // Validate and check each class code in the `class` table
     foreach ($class_codes as $class_code) {
-        // Validate format
-        if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
-            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid class code format. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
-            exit();
-        }
-    
-        // Check existence in the database
-        $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
-        $stmt->bind_param('s', $class_code);
-        $stmt->execute();
-        $stmt->bind_result($class_exists);
-        $stmt->fetch();
-        $stmt->close();
-    
-        if ($class_exists == 0) {
-            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
-            exit();         
+        if (!empty($class_code)) {
+            // Validate class code format
+            if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
+                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid class code format for Class Code. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
+                exit();
+            }
+
+            // Check if the class exists in the database
+            $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
+            $stmt->bind_param('s', $class_code);
+            $stmt->execute();
+            $stmt->bind_result($class_exists);
+            $stmt->fetch();
+            $stmt->close();
+
+            if ($class_exists == 0) {
+                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
+                exit();
+            }
         }
     }
-    
 
     // Check if diploma code exists
     $stmt = $con->prepare("SELECT COUNT(*) FROM diploma WHERE diploma_code = ?");
@@ -118,29 +114,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Insert data into the database
     $con->begin_transaction();
-
     $success = true;
 
     // Step 1: Insert into `user` table
     $stmt = $con->prepare("INSERT INTO `user` (identification_code, email, phone_number, full_name, role_id, password) VALUES (?, ?, ?, ?, ?, ?)");
     $role_id = 3;
     $default_password = password_hash("xyzpassword123!" . $student_id_code, PASSWORD_DEFAULT);
-    $email = $student_id_code . "@student.xyz.sg";
+    $email = $student_id_code . "@gmail.com";
     $stmt->bind_param("ssisis", $student_id_code, $email, $phone_number, $student_name, $role_id, $default_password);
 
     if (!$stmt->execute()) {
-        $success = false;   
+        $success = false;
         $con->rollback();
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Error inserting into `user` table: " . $stmt->error));
         exit();
     }
     $stmt->close();
 
-    // Step 2: Insert into `student` table
+    // Step 2: Insert into `student` table for each class code
     foreach ($class_codes as $class_code) {
         $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $student_id_code, $class_code, $diploma_code);
-
+        
+        if (empty($class_code)) {
+            $null = null; // Define a variable with NULL value
+            $stmt->bind_param("sss", $student_id_code, $null, $diploma_code); // Bind NULL for class_code
+        } else {
+            $stmt->bind_param("sss", $student_id_code, $class_code, $diploma_code); // Bind the actual class_code
+        }
+    
         if (!$stmt->execute()) {
             $success = false;
             $con->rollback();
@@ -149,6 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $stmt->close();
     }
+    
 
     if ($success) {
         $con->commit();

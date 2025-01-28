@@ -26,9 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         strtoupper(htmlspecialchars($_POST["upd_class_code_3"] ?? '')),
     ];
     $student_id_code = strtoupper(htmlspecialchars($_GET["student_id"])); // Get the student ID from the query string
-    if (empty($upd_student_name) || empty($upd_student_id_code) || empty($upd_phone_number) || empty($upd_diploma_code) ||
-        empty($upd_class_codes[0]) || empty($upd_class_codes[1]) || empty($upd_class_codes[2])) {
-        header("Location: admin_update_stu_recordform.php?error=" . urlencode("All fields are required.") . "&student_id=" . urlencode($student_id_code));
+    if (empty($upd_student_name) || empty($upd_student_id_code) || empty($upd_phone_number) || empty($upd_diploma_code) ) {
+        header("Location: admin_update_stu_recordform.php?error=" . urlencode("All fields are required and at least one class must be assigned.") . "&student_id=" . urlencode($student_id_code));
         exit();
     }
     // Validate phone number: must be exactly 8 numbers
@@ -51,24 +50,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 // Check if class codes exist in the database, but skip validation for "Nil"
-    foreach ($class_codes as $class_code) {
-        // Validate format
-        if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
-            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid class code format. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
-            exit();
-        }
+    foreach ($upd_class_codes as $class_code) {
+        if (!empty($class_code)) {
+            // Validate class code format
+            if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
+                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid class code format for Class Code. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
+                exit();
+            }
 
-        // Check existence in the database
-        $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
-        $stmt->bind_param('s', $class_code);
-        $stmt->execute();
-        $stmt->bind_result($class_exists);
-        $stmt->fetch();
-        $stmt->close();
+            // Check if the class exists in the database
+            $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
+            $stmt->bind_param('s', $class_code);
+            $stmt->execute();
+            $stmt->bind_result($class_exists);
+            $stmt->fetch();
+            $stmt->close();
 
-        if ($class_exists == 0) {
-            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
-            exit();         
+            if ($class_exists == 0) {
+                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
+                exit();
+            }
         }
     }
 
@@ -79,22 +80,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid diploma code format. It must be 3-4 uppercase letters.") . "&student_id=" . urlencode($student_id_code));
         exit();
     }
-
-    // Ensure all class codes are unique
-    $nil_class_codes = array_filter($upd_class_codes, function ($code) {
-        return $code !== "NIL";
-    });
-    
-    if (count($nil_class_codes) !== count(array_unique($nil_class_codes))) {
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Class codes must be unique, except for 'NIL'."));
-        exit();
-    }
-
-    // Check if class codes exist in the database
-// Validate class codes: allow "Nil" or 4-character codes with 2 letters followed by 2 digits
-
-
-
 
     // Check if diploma code exists in the database
     $stmt = $con->prepare("SELECT COUNT(*) FROM diploma WHERE diploma_code = ?");
@@ -121,7 +106,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: admin_update_stu_recordform.php?error=" . urlencode("Phone number already exists.") . "&student_id=" . urlencode($student_id_code));
         exit();
     }
-
+    $non_null_class_codes = array_filter($upd_class_codes);
+    if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
+        header("Location: admin_update_stu_recordform.php?error=" . urlencode("Ensure that all class codes are unique.") . "&student_id=" . urlencode($student_id_code));
+        exit();
+    }
     // Proceed to update the record
     $con->begin_transaction(); // Start a transaction
 
@@ -146,16 +135,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     foreach ($upd_class_codes as $class_code) {
-        if ($class_code) {
-            $insert_class_stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
-            $insert_class_stmt->bind_param('sss', $student_id_code, $class_code, $upd_diploma_code);
-
-            if (!$insert_class_stmt->execute()) {
-                $con->rollback();
-                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Error inserting updated class codes: " . $insert_class_stmt->error));
-                exit();
-            }
+        $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
+        
+        if (empty($class_code)) {
+            $null = null; // Define a variable with NULL value
+            $stmt->bind_param("sss", $student_id_code, $null, $upd_diploma_code); // Bind NULL for class_code
+        } else {
+            $stmt->bind_param("sss", $student_id_code, $class_code, $upd_diploma_code); // Bind the actual class_code
         }
+    
+        if (!$stmt->execute()) {
+            $success = false;
+            $con->rollback();
+            header("Location: admin_create_stu_recordform.php?error=" . urlencode("Error inserting into `student` table: " . $stmt->error));
+            exit();
+        }
+        $stmt->close();
     }
 
     $con->commit(); // Commit the transaction

@@ -41,7 +41,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (Faculty role: 2)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
-    header("Location: testlogin.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -49,7 +49,7 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
 $faculty_id_code = $_SESSION['session_identification_code'] ?? "";
 
 if (empty($faculty_id_code)) {
-    header("Location: testlogin.php?error=" . urlencode("Session expired. Please log in again."));
+    header("Location: ../login.php?error=" . urlencode("Session expired. Please log in again."));
     exit();
 }
 
@@ -66,14 +66,16 @@ $query = "
         co.course_name, 
         co.status, 
         d.diploma_code, 
-        d.diploma_name
+        d.diploma_name,
+        s.school_name,
+        s.school_code
     FROM user u
     JOIN class c ON u.identification_code = c.faculty_identification_code
     JOIN course co ON c.course_code = co.course_code
     JOIN diploma d ON co.diploma_code = d.diploma_code
+    JOIN school s ON d.school_code = s.school_code
     WHERE u.identification_code = ?
 ";
-
 $stmt = $con->prepare($query);
 $stmt->bind_param('s', $faculty_id_code);
 $stmt->execute();
@@ -99,25 +101,25 @@ $con->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Profile</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/SWAP/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src="../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-            <a href="faculty_dashboard.php">Home</a>
-            <a href="logout.php">Logout</a>
+            <a href="../faculty_dashboard.php">Home</a>
+            <a href="../logout.php">Logout</a>
         </nav>
     </div>
 
     <div class="container">
         <div class="card">
-            <img src="user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
+            <img src="../user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
             <h2 style="text-align: center;">Faculty Profile</h2>
             <?php if (!empty($faculty_data)): ?>
                 <table class="profile-table" border="1" bgcolor="white" align="center">
@@ -136,6 +138,10 @@ $con->close();
                     <tr>
                         <th>Email</th>
                         <td><?php echo htmlspecialchars($faculty_data[0]['email']); ?></td>
+                    </tr>
+                    <tr>
+                        <th>School</th> <!-- Added School Name Row -->
+                        <td><?php echo htmlspecialchars($faculty_data[0]['school_name']) . " (" . htmlspecialchars($faculty_data[0]['school_code']) . ")"; ?></td>
                     </tr>
                 </table>
                 <h3>Class and Courses</h3>

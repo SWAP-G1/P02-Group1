@@ -25,8 +25,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validation
     if (empty($student_name) || empty($phone_number) || empty($student_id_code) || empty($diploma_code) ||
-        empty($class_codes[0]) || empty($class_codes[1]) || empty($class_codes[2])) {
-        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("All fields are required."));
+        empty($class_codes[0])) {
+        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("All fields are required and at least one class must be assigned."));
         exit();
     }
 

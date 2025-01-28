@@ -43,37 +43,59 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (faculty role: 1)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
-    header("Location: testlogin.php");
+    header("Location: ../login.php");
     exit();
 }
 
 // Fetch faculty's full name from the session for display purposes
-$full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
+// Get faculty's school code (NEW CODE)
+$faculty_id = $_SESSION['session_identification_code'];
+$school_stmt = $con->prepare("SELECT school_code FROM faculty WHERE faculty_identification_code = ?");
+$school_stmt->bind_param('s', $faculty_id);
+$school_stmt->execute();
+$school_result = $school_stmt->get_result();
+$school_row = $school_result->fetch_assoc();
+$faculty_school_code = $school_row['school_code'] ?? '';
+$school_stmt->close();
 
-// Query to fetch all class codes and their associated course names
+// Fetch diplomas only for faculty's school 
+$diploma_query = "SELECT diploma_code, diploma_name 
+                  FROM diploma 
+                  WHERE school_code = ?";
+$diploma_stmt = $con->prepare($diploma_query);
+$diploma_stmt->bind_param('s', $faculty_school_code);
+$diploma_stmt->execute();
+$diploma_result = $diploma_stmt->get_result();
+
+
+// Fetch classes only for faculty's school
 $class_query = "
-    SELECT c.class_code, co.course_name
+    SELECT c.class_code, co.course_name, d.diploma_code 
     FROM class c
     JOIN course co ON c.course_code = co.course_code
-";
+    JOIN diploma d ON co.diploma_code = d.diploma_code
+    WHERE d.school_code = ?";
+$class_stmt = $con->prepare($class_query);
+$class_stmt->bind_param('s', $faculty_school_code);
+$class_stmt->execute();
+$class_result = $class_stmt->get_result();
 
-$class_result = mysqli_query($con, $class_query);
 
-// Organize class codes and course names into an array
+// Organize class codes
 $class_codes = [];
 if ($class_result && mysqli_num_rows($class_result) > 0) {
     while ($row = mysqli_fetch_assoc($class_result)) {
         $class_codes[] = [
             'class_code' => $row['class_code'],
-            'course_name' => $row['course_name']
+            'course_name' => $row['course_name'],
+            'diploma_code' => $row['diploma_code'] // Ensure diploma_code is added here
         ];
     }
 }
 
-// Query to fetch all diploma codes and names
-$diploma_query = "SELECT diploma_code, diploma_name FROM diploma";
-$diploma_result = mysqli_query($con, $diploma_query);
 
+// Fetch faculty's name
+$full_name = $_SESSION['session_full_name'] ?? "";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,18 +103,19 @@ $diploma_result = mysqli_query($con, $diploma_query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Profile Management</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="/SWAP/styles.css"> <!-- Link to your CSS file -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src="../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-            <a href="faculty_dashboard.php">Home</a>
-            <a href="logout.php">Logout</a>
+            <a href="../faculty_dashboard.php">Home</a>
+            <a href="../logout.php">Logout</a>
+            <a><?php echo htmlspecialchars($full_name); ?></a>
         </nav>
     </div>
     <div class="container">
@@ -147,7 +170,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                             while ($row = mysqli_fetch_assoc($diploma_result)) {
                                 echo "<option value='" . htmlspecialchars($row['diploma_code']) . "'>" . htmlspecialchars($row['diploma_name']) . "</option>";
                             }
-                        }
+                        }                        
                         ?>
                     </select>
                 </div>
@@ -158,9 +181,10 @@ $diploma_result = mysqli_query($con, $diploma_query);
                         <?php
                         foreach ($class_codes as $class) {
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . 
+                                 " (" . htmlspecialchars($class['diploma_code']) . ")" .
                                  "</option>";
-                        }
+                        }                                      
                         ?>
                     </select>
                 </div>
@@ -172,9 +196,10 @@ $diploma_result = mysqli_query($con, $diploma_query);
                         <?php
                         foreach ($class_codes as $class) {
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . 
+                                 " (" . htmlspecialchars($class['diploma_code']) . ")" .
                                  "</option>";
-                        }
+                        }          
                         ?>
                     </select>
                 </div>
@@ -186,9 +211,10 @@ $diploma_result = mysqli_query($con, $diploma_query);
                         <?php
                         foreach ($class_codes as $class) {
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . 
+                                 " (" . htmlspecialchars($class['diploma_code']) . ")" .
                                  "</option>";
-                        }
+                        }          
                         ?>
                     </select>
                 </div>
@@ -199,11 +225,10 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
         <div class="card">
             <h3>Student Records</h3>
-            <button id="scrollToTop" class="button" onclick="scroll_to_top()"><img src="scrollup.png" alt="Scroll to top"></button>
+            <button id="scrollToTop" class="button" onclick="scroll_to_top()"><img src="../scroll_up.png" alt="Scroll to top"></button>
 
             <?php
-
-            // Query to fetch student details along with class codes and course names
+            // Modified student records query
             $stmt = $con->prepare("
                 SELECT 
                     u.identification_code,
@@ -215,21 +240,16 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     d.diploma_name
                 FROM 
                     user u
-                JOIN 
-                    student s ON u.identification_code = s.identification_code
-                JOIN
-                    diploma d ON s.diploma_code = d.diploma_code
-                JOIN
-                    class c ON s.class_code = c.class_code
-                JOIN
-                    course co ON c.course_code = co.course_code
+                JOIN student s ON u.identification_code = s.identification_code
+                JOIN diploma d ON s.diploma_code = d.diploma_code
+                JOIN class c ON s.class_code = c.class_code
+                JOIN course co ON c.course_code = co.course_code
+                WHERE d.school_code = ?
             ");
-
-            // Execute the prepared query
+            $stmt->bind_param('s', $faculty_school_code);
             $stmt->execute();
-
-            // Retrieve the results of the executed query
             $result = $stmt->get_result();
+
 
             // Organize student data into an array for display
             $students = [];
@@ -339,7 +359,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
         // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+                showLogoutWarning("You will be logged out due to inactivity.", "../logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
         setTimeout(function() {
@@ -351,7 +371,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
-            window.location.href = "logout.php";
+            window.location.href = "../logout.php";
         }, remainingTime * 1000);
 
         // Scroll to top functionality

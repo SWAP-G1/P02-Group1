@@ -41,7 +41,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (admin role: 2)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
-    header("Location: testlogin.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -49,7 +49,7 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
 $admin_id_code = $_SESSION['session_identification_code'] ?? "";
 
 if (empty($admin_id_code)) {
-    header("Location: testlogin.php?error=" . urlencode("Session expired. Please log in again."));
+    header("Location: ../login.php?error=" . urlencode("Session expired. Please log in again."));
     exit();
 }
 
@@ -90,7 +90,7 @@ $con->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Profile</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/SWAP/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -101,14 +101,14 @@ $con->close();
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-            <a href="admin_dashboard.php">Home</a>
-            <a href="logout.php">Logout</a>
+            <a href="../admin_dashboard.php">Home</a>
+            <a href="../logout.php">Logout</a>
         </nav>
     </div>
 
     <div class="container">
         <div class="card">
-            <img src="user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
+            <img src="../user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
             <h2 style="text-align: center;">Admin Profile</h2>
             <?php if (!empty($admin_data)): ?>
                 <table class="profile-table" border="1" bgcolor="white" align="center">

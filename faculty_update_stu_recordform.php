@@ -44,32 +44,54 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Check if the user is logged in and has the correct role (faculty role: 2)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
-    header("Location: testlogin.php");
+    header("Location: ../login.php");
     exit();
 }
 
 // Query to fetch all class codes and their associated course names
+$faculty_id = $_SESSION['session_identification_code'];
+$school_stmt = $con->prepare("SELECT school_code FROM faculty WHERE faculty_identification_code = ?");
+$school_stmt->bind_param('s', $faculty_id);
+$school_stmt->execute();
+$school_result = $school_stmt->get_result();
+$school_row = $school_result->fetch_assoc();
+$faculty_school_code = $school_row['school_code'] ?? '';
+$school_stmt->close();
+
+// Fetch diplomas only for faculty's school 
+$diploma_query = "SELECT diploma_code, diploma_name 
+                  FROM diploma 
+                  WHERE school_code = ?";
+$diploma_stmt = $con->prepare($diploma_query);
+$diploma_stmt->bind_param('s', $faculty_school_code);
+$diploma_stmt->execute();
+$diploma_result = $diploma_stmt->get_result();
+
+
+// Fetch classes only for faculty's school
 $class_query = "
-    SELECT c.class_code, co.course_name
+    SELECT c.class_code, co.course_name, d.diploma_code 
     FROM class c
     JOIN course co ON c.course_code = co.course_code
-";
-$class_result = mysqli_query($con, $class_query);
+    JOIN diploma d ON co.diploma_code = d.diploma_code
+    WHERE d.school_code = ?";
+$class_stmt = $con->prepare($class_query);
+$class_stmt->bind_param('s', $faculty_school_code);
+$class_stmt->execute();
+$class_result = $class_stmt->get_result();
 
-// Store class codes and course names in an array
+
+// Organize class codes
 $class_codes = [];
 if ($class_result && mysqli_num_rows($class_result) > 0) {
     while ($row = mysqli_fetch_assoc($class_result)) {
         $class_codes[] = [
             'class_code' => $row['class_code'],
-            'course_name' => $row['course_name']
+            'course_name' => $row['course_name'],
+            'diploma_code' => $row['diploma_code'] // Ensure diploma_code is added here
         ];
     }
 }
-
-// Query to fetch all diploma codes and names
-$diploma_query = "SELECT diploma_code, diploma_name FROM diploma";
-$diploma_result = mysqli_query($con, $diploma_query);
 
 // Fetch student details based on the given student ID
 $student_id = isset($_GET['student_id']) ? $_GET['student_id'] : '';
@@ -127,18 +149,18 @@ $con->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Student Record</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="/SWAP/styles.css"> <!-- Link to your CSS file -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src="../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
             <a href="faculty_create_stu_recordform.php">Back to Student Records</a>
-            <a href="logout.php">Logout</a>
+            <a href="../logout.php">Logout</a>
         </nav>
     </div>
 
@@ -187,7 +209,7 @@ $con->close();
                             foreach ($class_codes as $class) {
                                 $selected = (!empty($existing_classes[0]) && $class['class_code'] === $existing_classes[0]['class_code']) ? 'selected' : '';
                                 echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
+                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) ." (" . htmlspecialchars($class['diploma_code']) . ")".
                                      "</option>";
                             }
                             ?>
@@ -202,7 +224,7 @@ $con->close();
                             foreach ($class_codes as $class) {
                                 $selected = (!empty($existing_classes[1]) && $class['class_code'] === $existing_classes[1]['class_code']) ? 'selected' : '';
                                 echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
+                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) ." (" . htmlspecialchars($class['diploma_code']) . ")".
                                      "</option>";
                             }
                             ?>
@@ -217,7 +239,7 @@ $con->close();
                             foreach ($class_codes as $class) {
                                 $selected = (!empty($existing_classes[2]) && $class['class_code'] === $existing_classes[2]['class_code']) ? 'selected' : '';
                                 echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
+                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) ." (" . htmlspecialchars($class['diploma_code']) . ")".
                                      "</option>";
                             }
                             ?>
@@ -273,7 +295,7 @@ $con->close();
         // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+                showLogoutWarning("You will be logged out due to inactivity.", "../logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
         setTimeout(function() {
@@ -285,7 +307,7 @@ $con->close();
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
-            window.location.href = "logout.php";
+            window.location.href = "../logout.php";
         }, remainingTime * 1000);
 
         // Scroll to top functionality
