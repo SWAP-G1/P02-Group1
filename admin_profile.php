@@ -109,7 +109,7 @@ $con->close();
     <div class="container">
         <div class="card">
             <img src="../user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
-            <h2 style="text-align: center;">Admin Profile</h2>
+            <h2 style="text-align: center;">My Profile</h2>
             <?php if (!empty($admin_data)): ?>
                 <table class="profile-table" border="1" bgcolor="white" align="center">
                     <tr>

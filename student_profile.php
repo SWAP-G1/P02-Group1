@@ -49,7 +49,8 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 3) {
 
 // Fetch admin's full name from the session for display purposes
 $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
-$student_id_code = isset($_GET['student_id']) ? $_GET['student_id'] : '';
+$student_id_code = $_SESSION['session_identification_code'] ?? "";
+
 $query = "
     SELECT 
         u.full_name, u.phone_number, u.email, u.identification_code, 
@@ -59,8 +60,8 @@ $query = "
     JOIN student s ON u.identification_code = s.identification_code
     JOIN diploma d ON s.diploma_code = d.diploma_code
     JOIN school sch ON d.school_code = sch.school_code
-    JOIN class c ON s.class_code = c.class_code
-    JOIN course co ON c.course_code = co.course_code
+    LEFT JOIN class c ON s.class_code = c.class_code
+    LEFT JOIN course co ON c.course_code = co.course_code
     WHERE u.identification_code = ?
 ";
 
@@ -71,6 +72,12 @@ $result = $stmt->get_result();
 
 $student_data = [];
 while ($row = $result->fetch_assoc()) {
+    // Handle NULL values
+    $row['class_code'] = $row['class_code'] ?? 'No Class';
+    $row['class_type'] = $row['class_type'] ?? 'N/A';
+    $row['course_name'] = $row['course_name'] ?? 'No Course Assigned';
+    $row['status'] = $row['status'] ?? 'N/A';
+    
     $student_data[] = $row;
 }
 $stmt->close();
@@ -106,7 +113,7 @@ $con->close();
 
     <div class="container">
         <div class="card">
-            <img src="user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
+            <img src="../user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
             <h2 style="text-align: center;">My Profile</h2>
             <?php if (!empty($student_data)): ?>
                 <table class="profile-table" border="1" bgcolor="white" align="center">
@@ -167,6 +174,7 @@ $con->close();
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Management. All Rights Reserved.</p>
     </footer>
+
     <div id="logoutWarningModal" class="modal" style="display: none;">
         <div class="modal-content">
             <p id="logoutWarningMessage"></p>

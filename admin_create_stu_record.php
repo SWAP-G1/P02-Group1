@@ -57,11 +57,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Phone number already exists."));
         exit();
     }
+
     $non_null_class_codes = array_filter($class_codes);
     if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Ensure that all class codes are unique."));
         exit();
     }
+
     // Check for existing student ID
     $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
     $stmt->bind_param("s", $student_id_code);
@@ -131,17 +133,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->close();
 
-    // Step 2: Insert into `student` table for each class code
+    // Step 2: Insert into `student` table (Valid Class Codes First, NULL Last)
+    $valid_class_codes = [];
+    $null_class_codes = [];
+
     foreach ($class_codes as $class_code) {
-        $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
-        
-        if (empty($class_code)) {
-            $null = null; // Define a variable with NULL value
-            $stmt->bind_param("sss", $student_id_code, $null, $diploma_code); // Bind NULL for class_code
+        if (!empty($class_code)) {
+            $valid_class_codes[] = $class_code;
         } else {
-            $stmt->bind_param("sss", $student_id_code, $class_code, $diploma_code); // Bind the actual class_code
+            $null_class_codes[] = null;
         }
-    
+    }
+
+    // Insert valid class codes first
+    foreach ($valid_class_codes as $class_code) {
+        $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $student_id_code, $class_code, $diploma_code);
+
         if (!$stmt->execute()) {
             $success = false;
             $con->rollback();
@@ -150,7 +158,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $stmt->close();
     }
-    
+
+    // Insert NULL class codes last
+    foreach ($null_class_codes as $null_class_code) {
+        $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, NULL, ?)");
+        $stmt->bind_param("ss", $student_id_code, $diploma_code);
+
+        if (!$stmt->execute()) {
+            $success = false;
+            $con->rollback();
+            header("Location: admin_create_stu_recordform.php?error=" . urlencode("Error inserting into `student` table: " . $stmt->error));
+            exit();
+        }
+        $stmt->close();
+    }
 
     if ($success) {
         $con->commit();
