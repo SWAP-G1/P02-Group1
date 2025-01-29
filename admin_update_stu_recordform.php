@@ -107,9 +107,9 @@ if (!empty($student_id)) {
     }
     
     // Validate student ID format (3 digits followed by 1 uppercase letter)
-    $pattern_student_id = '/^\d{3}[A-Z]$/';
+    $pattern_student_id = '/^S\d{3}$/';
     if (!preg_match($pattern_student_id, $student_id)) {
-        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Error: Invalid student ID format."));
+        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must start with letter 'S' followed by 3 numbers."));
         exit();
     }
 }

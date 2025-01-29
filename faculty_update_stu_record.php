@@ -39,9 +39,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Validate student ID: must be 3 digits followed by an uppercase letter
-    $pattern_student_id = '/^\d{3}[A-Z]$/';
+    $pattern_student_id = '/^S\d{3}$/';
     if (!preg_match($pattern_student_id, $student_id_code)) {
-        header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Invalid student ID format. It must be 3 digits followed by an uppercase letter.") . "&student_id=" . urlencode($student_id_code));
+        header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must start with letter 'S' followed by 3 numbers.") . "&student_id=" . urlencode($student_id_code));
         exit();
     }
 

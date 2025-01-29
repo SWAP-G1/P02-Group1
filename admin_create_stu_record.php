@@ -40,8 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    if (!preg_match('/^\d{3}[A-Z]$/', $student_id_code)) {
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Invalid student ID format. It must be 3 digits followed by 1 uppercase letter."));
+    if (!preg_match('/^S\d{3}$/', $student_id_code)) {
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must start with letter 'S' followed by 3 numbers."));
         exit();
     }
 

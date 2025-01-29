@@ -15,8 +15,8 @@ if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token
 if (isset($_GET["student_id"])) {
     $student_id_code = htmlspecialchars($_GET["student_id"]);
 
-    // Define the regex pattern: 3 digits followed by a letter
-    $pattern = '/^\d{3}[A-Z]$/';
+    // Define the regex pattern: 3 digits followed by S
+    $pattern = '/^S\d{3}$/';
 
     if (preg_match($pattern, $student_id_code)) {
         // Delete the record from the `student` table
@@ -44,7 +44,7 @@ if (isset($_GET["student_id"])) {
         }
     } else {
         // Invalid Student ID format
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must be 3 digits followed by an alphabet."));
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must start with letter 'S' followed by 3 numbers."));
         exit();
     }
 } else {
