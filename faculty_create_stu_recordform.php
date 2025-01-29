@@ -270,15 +270,15 @@ $full_name = $_SESSION['session_full_name'] ?? "";
                 // Assign class codes and course names to available slots
                 // Check if the first slot is empty and if the current row has a valid class code
                 if (empty($students[$student_id]['class_code_1']) && !empty($row['class_code'])) {
-                    $students[$student_id]['class_code_1'] = $row['class_code'] . ": " . $row['course_name'];
+                    $students[$student_id]['class_code_1'] = $row['class_code'] . ": " . $row['course_name'] . " (" . $row['diploma_code'] . ")";
                 } 
                 // Check if the second slot is empty and if the current row has a valid class code
                 elseif (empty($students[$student_id]['class_code_2']) && !empty($row['class_code'])) {
-                    $students[$student_id]['class_code_2'] = $row['class_code'] . ": " . $row['course_name'];
+                    $students[$student_id]['class_code_2'] = $row['class_code'] . ": " . $row['course_name'] . " (" . $row['diploma_code'] . ")";
                 } 
                 // Check if the third slot is empty and if the current row has a valid class code
                 elseif (empty($students[$student_id]['class_code_3']) && !empty($row['class_code'])) {
-                    $students[$student_id]['class_code_3'] = $row['class_code'] . ": " . $row['course_name'];
+                    $students[$student_id]['class_code_3'] = $row['class_code'] . ": " . $row['course_name'] . " (" . $row['diploma_code'] . ")";
                 }
             }
 
