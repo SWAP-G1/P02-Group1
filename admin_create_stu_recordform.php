@@ -130,20 +130,20 @@ $diploma_result = mysqli_query($con, $diploma_query);
             <form method="POST" action="admin_create_stu_record.php">
                 <div class="form-group">
                     <label class="label" for="student_name">Student Name</label>
-                    <input type="text" name="student_name" placeholder="Enter Student Name" >
+                    <input type="text" name="student_name" placeholder="Enter Student Name" required>
                 </div>
                 <div class="form-group">
                     <label class="label" for="phone_number">Phone Number</label>
-                    <input type="text" name="phone_number" placeholder="Enter Phone Number" maxlength="8" >
+                    <input type="text" name="phone_number" placeholder="Enter Phone Number" maxlength="8" required>
                 </div>
                 <div class="form-group">
                     <label class="label" for="student_id_code">Student ID Code</label>
                     <p>Student Email Format: Student ID + @gmail.com</p>
-                    <input type="text" name="student_id_code" placeholder="Enter Student ID Code" maxlength="4" >
+                    <input type="text" name="student_id_code" placeholder="Enter Student ID Code" maxlength="4" required>
                 </div>
                 <div class="form-group">
                     <label class="label" for="diploma_code">Diploma Name</label>
-                    <select name="diploma_code" >
+                    <select name="diploma_code" required>
                         <option value="" disabled selected>Select a Diploma Name</option>
                         <?php
                         if ($diploma_result && mysqli_num_rows($diploma_result) > 0) {
@@ -155,7 +155,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="label" for="class_code_1">Class Code 3</label>
+                    <label class="label" for="class_code_1">Class Code 1</label>
                     <select name="class_code_1">
                         <option value="" selected>No Class</option>
                         <?php
@@ -167,7 +167,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 </div>
 
                 <div class="form-group">
-                    <label class="label" for="class_code_2">Class Code 3</label>
+                    <label class="label" for="class_code_2">Class Code 2</label>
                     <select name="class_code_2">
                         <option value="" selected>No Class</option>
                         <?php
@@ -203,25 +203,25 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
             // Query to fetch student details along with class codes and course names
             $stmt = $con->prepare("
-    SELECT 
-        u.identification_code,
-        u.full_name,
-        u.phone_number,
-        s.class_code,
-        co.course_name,
-        d.diploma_code,
-        d.diploma_name
-    FROM 
-        user u
-    JOIN 
-        student s ON u.identification_code = s.identification_code
-    JOIN
-        diploma d ON s.diploma_code = d.diploma_code
-     LEFT JOIN
-        class c ON s.class_code = c.class_code
-     LEFT JOIN
-        course co ON c.course_code = co.course_code
-");
+                SELECT 
+                    u.identification_code,
+                    u.full_name,
+                    u.phone_number,
+                    s.class_code,
+                    co.course_name,
+                    d.diploma_code,
+                    d.diploma_name
+                FROM 
+                    user u
+                JOIN 
+                    student s ON u.identification_code = s.identification_code
+                JOIN
+                    diploma d ON s.diploma_code = d.diploma_code
+                LEFT JOIN
+                    class c ON s.class_code = c.class_code
+                LEFT JOIN
+                    course co ON c.course_code = co.course_code
+            ");
 
 
             // Execute the prepared query
@@ -253,15 +253,15 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 // Assign class codes and course names to available slots
                 // Check if the first slot is empty and if the current row has a valid class code
                 if (empty($students[$student_id]['class_code_1']) && !empty($row['class_code'])) {
-                    $students[$student_id]['class_code_1'] = $row['class_code'] . ": " . $row['course_name'];
+                    $students[$student_id]['class_code_1'] = $row['class_code'] . ": " . $row['course_name'] . " (" . $row['diploma_code'] . ")";
                 } 
                 // Check if the second slot is empty and if the current row has a valid class code
                 elseif (empty($students[$student_id]['class_code_2']) && !empty($row['class_code'])) {
-                    $students[$student_id]['class_code_2'] = $row['class_code'] . ": " . $row['course_name'];
+                    $students[$student_id]['class_code_2'] = $row['class_code'] . ": " . $row['course_name'] . " (" . $row['diploma_code'] . ")";
                 } 
                 // Check if the third slot is empty and if the current row has a valid class code
                 elseif (empty($students[$student_id]['class_code_3']) && !empty($row['class_code'])) {
-                    $students[$student_id]['class_code_3'] = $row['class_code'] . ": " . $row['course_name'];
+                    $students[$student_id]['class_code_3'] = $row['class_code'] . ": " . $row['course_name'] . " (" . $row['diploma_code'] . ")";
                 }
             }
             
@@ -284,18 +284,19 @@ $diploma_result = mysqli_query($con, $diploma_query);
             foreach ($students as $student) {
                 if (preg_match('/^\d{3}[A-Z]$/', $student['identification_code'])) {
                     echo '<tr>';
-                    echo '<td>' . $student['identification_code'] . '</td>';
-                    echo '<td>' . $student['full_name'] . '</td>';
-                    echo '<td>' . $student['phone_number'] . '</td>';
-                    echo '<td>' . (!empty($student['class_code_1']) ? $student['class_code_1'] : 'No Class') . '</td>';
-                    echo '<td>' . (!empty($student['class_code_2']) ? $student['class_code_2'] : 'No Class') . '</td>';
-                    echo '<td>' . (!empty($student['class_code_3']) ? $student['class_code_3'] : 'No Class') . '</td>';
-                    echo '<td>' . $student['diploma_name'] . '</td>';
-                    echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . $student['identification_code'] . '">Edit</a> </td>';
-                    echo '<td> <a href="admin_delete_stu_record.php?student_id=' . $student['identification_code'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Delete</a> </td>';
+                    echo '<td>' . htmlspecialchars($student['identification_code']) . '</td>';
+                    echo '<td>' . htmlspecialchars($student['full_name']) . '</td>';
+                    echo '<td>' . htmlspecialchars($student['phone_number']) . '</td>';
+                    echo '<td>' . (!empty($student['class_code_1']) ? htmlspecialchars($student['class_code_1']) : 'No Class') . '</td>';
+                    echo '<td>' . (!empty($student['class_code_2']) ? htmlspecialchars($student['class_code_2']) : 'No Class') . '</td>';
+                    echo '<td>' . (!empty($student['class_code_3']) ? htmlspecialchars($student['class_code_3']) : 'No Class') . '</td>';
+                    echo '<td>' . htmlspecialchars($student['diploma_name']) . '</td>';
+                    echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . urlencode($student['identification_code']) . '">Edit</a> </td>';
+                    echo '<td> <a href="admin_delete_stu_record.php?student_id=' . urlencode($student['identification_code']) . '&csrf_token=' . urlencode($_SESSION['csrf_token']) . '">Delete</a> </td>';
                     echo '</tr>';
                 }
             }
+
 
 
             // Close the HTML table

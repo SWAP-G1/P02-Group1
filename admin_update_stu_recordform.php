@@ -41,10 +41,12 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
 
 // Fetch all class codes and associated course names
 $class_query = "
-    SELECT c.class_code, co.course_name
+    SELECT c.class_code, co.course_name, d.diploma_code
     FROM class c
     LEFT JOIN course co ON c.course_code = co.course_code
+    LEFT JOIN diploma d ON co.diploma_code = d.diploma_code
 ";
+
 $class_result = mysqli_query($con, $class_query);
 
 // Store class codes and course names
@@ -53,10 +55,12 @@ if ($class_result && mysqli_num_rows($class_result) > 0) {
     while ($row = mysqli_fetch_assoc($class_result)) {
         $class_codes[] = [
             'class_code' => $row['class_code'],
-            'course_name' => $row['course_name']
+            'course_name' => $row['course_name'],
+            'diploma_code' => $row['diploma_code'] // ✅ Store diploma_code properly
         ];
     }
 }
+
 
 // Fetch all diploma codes and names
 $diploma_query = "SELECT diploma_code, diploma_name FROM diploma";
@@ -93,6 +97,19 @@ if (!empty($student_id)) {
 
     if (empty($student_name)) {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Student record not found."));
+        exit();
+    }
+
+    // If no classes are found, set an error message
+    if (empty($existing_classes)) {
+        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Error: Student record not found."));
+        exit();
+    }
+    
+    // Validate student ID format (3 digits followed by 1 uppercase letter)
+    $pattern_student_id = '/^\d{3}[A-Z]$/';
+    if (!preg_match($pattern_student_id, $student_id)) {
+        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Error: Invalid student ID format."));
         exit();
     }
 }
@@ -143,8 +160,8 @@ $con->close();
                 </div>
                 <div class="form-group">
                     <label class="label" for="student_id_code">Student ID Code</label>
-                    <p>Student Email Format: Student ID + @student.xyz.sg</p>
-                    <input type="text" name="upd_student_id_code" maxlength="4" value="<?php echo htmlspecialchars($student_id); ?>">
+                    <p>Student Email Format: Student ID + @gmail.com</p>
+                    <input type="text" name="upd_student_id_code" maxlength="4" value="<?php echo htmlspecialchars($student_id); ?>" required>
                 </div>
                 <div class="form-group">
                     <label class="label" for="diploma_code">Diploma Name</label>
@@ -170,9 +187,9 @@ $con->close();
                         foreach ($class_codes as $class) {
                             $selected = (!empty($existing_classes[0]) && $class['class_code'] === $existing_classes[0]['class_code']) ? 'selected' : '';
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
-                                 "</option>";
-                        }
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" .
+                                 htmlspecialchars($class['diploma_code']) . ")</option>";
+                        }                        
                         ?>
                     </select>
                 </div>
@@ -186,9 +203,9 @@ $con->close();
                         foreach ($class_codes as $class) {
                             $selected = (!empty($existing_classes[1]) && $class['class_code'] === $existing_classes[1]['class_code']) ? 'selected' : '';
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
-                                 "</option>";
-                        }
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" .
+                                 htmlspecialchars($class['diploma_code']) . ")</option>";
+                        }                        
                         ?>
                     </select>
                 </div>
@@ -202,9 +219,9 @@ $con->close();
                         foreach ($class_codes as $class) {
                             $selected = (!empty($existing_classes[2]) && $class['class_code'] === $existing_classes[2]['class_code']) ? 'selected' : '';
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) .
-                                 "</option>";
-                        }
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" .
+                                 htmlspecialchars($class['diploma_code']) . ")</option>";
+                        }                        
                         ?>
                     </select>
                 </div>

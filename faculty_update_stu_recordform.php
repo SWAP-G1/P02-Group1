@@ -70,10 +70,10 @@ $diploma_result = $diploma_stmt->get_result();
 
 // Fetch classes only for faculty's school
 $class_query = "
-    SELECT c.class_code, co.course_name, d.diploma_code 
+    SELECT c.class_code, co.course_name, d.diploma_code
     FROM class c
-    JOIN course co ON c.course_code = co.course_code
-    JOIN diploma d ON co.diploma_code = d.diploma_code
+    LEFT JOIN course co ON c.course_code = co.course_code
+    LEFT JOIN diploma d ON co.diploma_code = d.diploma_code
     WHERE d.school_code = ?";
 $class_stmt = $con->prepare($class_query);
 $class_stmt->bind_param('s', $faculty_school_code);
@@ -100,9 +100,9 @@ if (!empty($student_id)) {
     $stmt = $con->prepare("
         SELECT u.full_name, u.phone_number, u.identification_code, s.diploma_code, s.class_code, co.course_name
         FROM user u
-        JOIN student s ON u.identification_code = s.identification_code
-        JOIN class c ON s.class_code = c.class_code
-        JOIN course co ON c.course_code = co.course_code
+        LEFT JOIN student s ON u.identification_code = s.identification_code
+        LEFT JOIN class c ON s.class_code = c.class_code
+        LEFT JOIN course co ON c.course_code = co.course_code
         WHERE u.identification_code = ?
     ");
     $stmt->bind_param('s', $student_id);
@@ -202,49 +202,52 @@ $con->close();
                     </div>
 
                     <div class="form-group">
-                        <label class="label" for="class_code_1">Class Code 1</label>
-                        <select name="upd_class_code_1" required>
-                            <option value="" disabled>Select a Class Code</option>
-                            <?php
-                            foreach ($class_codes as $class) {
-                                $selected = (!empty($existing_classes[0]) && $class['class_code'] === $existing_classes[0]['class_code']) ? 'selected' : '';
-                                echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) ." (" . htmlspecialchars($class['diploma_code']) . ")".
-                                     "</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
+                    <label class="label" for="class_code_1">Class Code 1</label>
+                    <select name="upd_class_code_1">
+                        <option value="" <?php echo empty($existing_classes[0]['class_code']) ? 'selected' : ''; ?>>No Class</option>
+                        <?php
+                        foreach ($class_codes as $class) {
+                            $selected = (!empty($existing_classes[0]) && $class['class_code'] === $existing_classes[0]['class_code']) ? 'selected' : '';
+                            echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" .
+                                 htmlspecialchars($class['diploma_code']) . ")</option>";
+                        }                        
+                        ?>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label class="label" for="class_code_2">Class Code 2</label>
-                        <select name="upd_class_code_2" required>
-                            <option value="" disabled>Select a Class Code</option>
-                            <?php
-                            foreach ($class_codes as $class) {
-                                $selected = (!empty($existing_classes[1]) && $class['class_code'] === $existing_classes[1]['class_code']) ? 'selected' : '';
-                                echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) ." (" . htmlspecialchars($class['diploma_code']) . ")".
-                                     "</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
+                <!-- Class Code 2 -->
+                <div class="form-group">
+                    <label class="label" for="class_code_2">Class Code 2</label>
+                    <select name="upd_class_code_2">
+                        <option value="" <?php echo empty($existing_classes[1]['class_code']) ? 'selected' : ''; ?>>No Class</option>
+                        <?php
+                        foreach ($class_codes as $class) {
+                            $selected = (!empty($existing_classes[1]) && $class['class_code'] === $existing_classes[1]['class_code']) ? 'selected' : '';
+                            echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" .
+                                 htmlspecialchars($class['diploma_code']) . ")</option>";
+                        }                        
+                        ?>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label class="label" for="class_code_3">Class Code 3</label>
-                        <select name="upd_class_code_3" required>
-                            <option value="" disabled>Select a Class Code</option>
-                            <?php
-                            foreach ($class_codes as $class) {
-                                $selected = (!empty($existing_classes[2]) && $class['class_code'] === $existing_classes[2]['class_code']) ? 'selected' : '';
-                                echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
-                                     htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) ." (" . htmlspecialchars($class['diploma_code']) . ")".
-                                     "</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
+                <!-- Class Code 3 -->
+                <div class="form-group">
+                    <label class="label" for="class_code_3">Class Code 3</label>
+                    <select name="upd_class_code_3">
+                        <option value="" <?php echo empty($existing_classes[2]['class_code']) ? 'selected' : ''; ?>>No Class</option>
+                        <?php
+                        foreach ($class_codes as $class) {
+                            $selected = (!empty($existing_classes[2]) && $class['class_code'] === $existing_classes[2]['class_code']) ? 'selected' : '';
+                            echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
+                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" .
+                                 htmlspecialchars($class['diploma_code']) . ")</option>";
+                        }                        
+                        ?>
+                    </select>
+                </div>
+
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <button type="submit">Update Record</button>
                 </form>

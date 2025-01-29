@@ -46,13 +46,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Validate class codes: 4 characters, first 2 are uppercase letters, last 2 are digits
-    $pattern_class_code = '/^[A-Z]{2}\d{2}$/';
-    foreach ($upd_class_codes as $class_code) {
-        if ($class_code && !preg_match($pattern_class_code, $class_code)) {
-            header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Invalid class code format. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
+// Check if class codes exist in the database, but skip validation for "Nil"
+foreach ($upd_class_codes as $class_code) {
+    if (!empty($class_code)) {
+        // Validate class code format
+        if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
+            header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Invalid class code format for Class Code. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
+            exit();
+        }
+
+        // Check if the class exists in the database
+        $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
+        $stmt->bind_param('s', $class_code);
+        $stmt->execute();
+        $stmt->bind_result($class_exists);
+        $stmt->fetch();
+        $stmt->close();
+
+        if ($class_exists == 0) {
+            header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
             exit();
         }
     }
+}
 
     // Validate diploma code: must be 3-4 uppercase letters
     $pattern_diploma_code = '/^[A-Z]{3,4}$/';
@@ -61,9 +77,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Ensure all class codes are unique
-    if (count(array_filter($upd_class_codes)) !== count(array_unique(array_filter($upd_class_codes)))) {
-        header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Class codes must not overlap. Ensure all class codes are unique.") . "&student_id=" . urlencode($student_id_code));
+    $non_null_class_codes = array_filter($upd_class_codes);
+    if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
+        header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Ensure that all class codes are unique.") . "&student_id=" . urlencode($student_id_code));
         exit();
     }
 
@@ -134,16 +150,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     foreach ($upd_class_codes as $class_code) {
-        if ($class_code) {
-            $insert_class_stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
-            $insert_class_stmt->bind_param('sss', $student_id_code, $class_code, $upd_diploma_code);
-
-            if (!$insert_class_stmt->execute()) {
-                $con->rollback();
-                header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Error inserting updated class codes: " . $insert_class_stmt->error));
-                exit();
-            }
+        $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
+        
+        if (empty($class_code)) {
+            $null = null; // Define a variable with NULL value
+            $stmt->bind_param("sss", $student_id_code, $null, $upd_diploma_code); // Bind NULL for class_code
+        } else {
+            $stmt->bind_param("sss", $student_id_code, $class_code, $upd_diploma_code); // Bind the actual class_code
         }
+    
+        if (!$stmt->execute()) {
+            $success = false;
+            $con->rollback();
+            header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Error inserting into `student` table: " . $stmt->error));
+            exit();
+        }
+        $stmt->close();
     }
 
     $con->commit(); // Commit the transaction

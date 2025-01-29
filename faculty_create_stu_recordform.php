@@ -158,7 +158,7 @@ $full_name = $_SESSION['session_full_name'] ?? "";
                 </div>
                 <div class="form-group">
                     <label class="label" for="student_id_code">Student ID Code</label>
-                    <p>Student Email Format: Student ID + @student.xyz.sg</p>
+                    <p>Student Email Format: Student ID + @gmail.com</p>
                     <input type="text" name="student_id_code" placeholder="Enter Student ID Code" maxlength="4" required>
                 </div>
                 <div class="form-group">
@@ -176,48 +176,40 @@ $full_name = $_SESSION['session_full_name'] ?? "";
                 </div>
                 <div class="form-group">
                     <label class="label" for="class_code_1">Class Code 1</label>
-                    <select name="class_code_1" required>
-                        <option value="" disabled selected>Select a Class Code</option>
+                    <select name="class_code_1">
+                        <option value="" selected>No Class</option>
                         <?php
                         foreach ($class_codes as $class) {
-                            echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . 
-                                 " (" . htmlspecialchars($class['diploma_code']) . ")" .
-                                 "</option>";
-                        }                                      
+                            echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" . htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" . htmlspecialchars($class['diploma_code']) . ")" ."</option>";
+                        }        
                         ?>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label class="label" for="class_code_2">Class Code 2</label>
-                    <select name="class_code_2" required>
-                        <option value="" disabled selected>Select a Class Code</option>
+                    <select name="class_code_2">
+                        <option value="" selected>No Class</option>
                         <?php
                         foreach ($class_codes as $class) {
-                            echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . 
-                                 " (" . htmlspecialchars($class['diploma_code']) . ")" .
-                                 "</option>";
-                        }          
+                            echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" . htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" . htmlspecialchars($class['diploma_code']) . ")" ."</option>";
+                        }        
                         ?>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label class="label" for="class_code_3">Class Code 3</label>
-                    <select name="class_code_3" required>
-                        <option value="" disabled selected>Select a Class Code</option>
+                    <select name="class_code_3">
+                        <option value="" selected>No Class</option>
                         <?php
                         foreach ($class_codes as $class) {
-                            echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" .
-                                 htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . 
-                                 " (" . htmlspecialchars($class['diploma_code']) . ")" .
-                                 "</option>";
-                        }          
+                            echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" . htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" . htmlspecialchars($class['diploma_code']) . ")" ."</option>";
+                        }        
                         ?>
                     </select>
                 </div>
+
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <button type="submit">Submit</button>
             </form>
@@ -240,10 +232,14 @@ $full_name = $_SESSION['session_full_name'] ?? "";
                     d.diploma_name
                 FROM 
                     user u
-                JOIN student s ON u.identification_code = s.identification_code
-                JOIN diploma d ON s.diploma_code = d.diploma_code
-                JOIN class c ON s.class_code = c.class_code
-                JOIN course co ON c.course_code = co.course_code
+                JOIN 
+                    student s ON u.identification_code = s.identification_code
+                JOIN
+                    diploma d ON s.diploma_code = d.diploma_code
+                LEFT JOIN
+                    class c ON s.class_code = c.class_code
+                LEFT JOIN
+                    course co ON c.course_code = co.course_code
                 WHERE d.school_code = ?
             ");
             $stmt->bind_param('s', $faculty_school_code);
@@ -255,25 +251,33 @@ $full_name = $_SESSION['session_full_name'] ?? "";
             $students = [];
             while ($row = $result->fetch_assoc()) {
                 $student_id = $row['identification_code'];
+                
+                // Check if the student is already in the array
                 if (!isset($students[$student_id])) {
+                    // Initialize the student's data in the array
                     $students[$student_id] = [
                         'identification_code' => $row['identification_code'],
                         'full_name' => $row['full_name'],
                         'phone_number' => $row['phone_number'],
                         'diploma_code' => $row['diploma_code'],
                         'diploma_name' => $row['diploma_name'],
-                        'class_code_1' => null,
-                        'class_code_2' => null,
-                        'class_code_3' => null,
+                        'class_code_1' => null, // Placeholder for first class
+                        'class_code_2' => null, // Placeholder for second class
+                        'class_code_3' => null  // Placeholder for third class
                     ];
                 }
-
-                // Assign class codes and course names to slots
-                if (is_null($students[$student_id]['class_code_1'])) {
+            
+                // Assign class codes and course names to available slots
+                // Check if the first slot is empty and if the current row has a valid class code
+                if (empty($students[$student_id]['class_code_1']) && !empty($row['class_code'])) {
                     $students[$student_id]['class_code_1'] = $row['class_code'] . ": " . $row['course_name'];
-                } elseif (is_null($students[$student_id]['class_code_2'])) {
+                } 
+                // Check if the second slot is empty and if the current row has a valid class code
+                elseif (empty($students[$student_id]['class_code_2']) && !empty($row['class_code'])) {
                     $students[$student_id]['class_code_2'] = $row['class_code'] . ": " . $row['course_name'];
-                } elseif (is_null($students[$student_id]['class_code_3'])) {
+                } 
+                // Check if the third slot is empty and if the current row has a valid class code
+                elseif (empty($students[$student_id]['class_code_3']) && !empty($row['class_code'])) {
                     $students[$student_id]['class_code_3'] = $row['class_code'] . ": " . $row['course_name'];
                 }
             }
@@ -295,14 +299,14 @@ $full_name = $_SESSION['session_full_name'] ?? "";
             foreach ($students as $student) {
                 if (preg_match('/^\d{3}[A-Z]$/', $student['identification_code'])) {
                     echo '<tr>';
-                    echo '<td>' . $student['identification_code'] . '</td>';
-                    echo '<td>' . $student['full_name'] . '</td>';
-                    echo '<td>' . $student['phone_number'] . '</td>';
-                    echo '<td>' . ($student['class_code_1'] ?? 'N/A') . '</td>';
-                    echo '<td>' . ($student['class_code_2'] ?? 'N/A') . '</td>';
-                    echo '<td>' . ($student['class_code_3'] ?? 'N/A') . '</td>';
-                    echo '<td>' . $student['diploma_name'] . '</td>';
-                    echo '<td> <a href="faculty_update_stu_recordform.php?student_id=' . $student['identification_code'] . '">Edit</a> </td>';
+                    echo '<td>' . htmlspecialchars($student['identification_code']) . '</td>';
+                    echo '<td>' . htmlspecialchars($student['full_name']) . '</td>';
+                    echo '<td>' . htmlspecialchars($student['phone_number']) . '</td>';
+                    echo '<td>' . (!empty($student['class_code_1']) ? htmlspecialchars($student['class_code_1']) : 'No Class') . '</td>';
+                    echo '<td>' . (!empty($student['class_code_2']) ? htmlspecialchars($student['class_code_2']) : 'No Class') . '</td>';
+                    echo '<td>' . (!empty($student['class_code_3']) ? htmlspecialchars($student['class_code_3']) : 'No Class') . '</td>';
+                    echo '<td>' . htmlspecialchars($student['diploma_name']) . '</td>';
+                    echo '<td> <a href="faculty_update_stu_recordform.php?student_id=' . urlencode($student['identification_code']) . '">Edit</a> </td>';
                     echo '</tr>';
                 }
             }
@@ -318,6 +322,7 @@ $full_name = $_SESSION['session_full_name'] ?? "";
 
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
+    </footer>
         <div id="logoutWarningModal" class="modal" style="display: none;">
         <div class="modal-content">
             <p id="logoutWarningMessage"></p>
