@@ -128,19 +128,19 @@ if (isset($_POST["view_button"])) {
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student GPA</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href=" ../styles.css"> <!-- Link to your CSS file -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="bwlogo-removebg.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src=" ../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-            <a href="faculty_dashboard.php">Home</a>
-            <a href="logout.php">Logout</a>
+            <a href=" ../faculty_dashboard.php">Home</a>
+            <a href=" ../logout.php">Logout</a>
             <a><?php echo htmlspecialchars($full_name); ?></a>
         </nav>
     </div>
@@ -203,6 +203,7 @@ if (isset($_POST["view_button"])) {
 
         <div class="card">
             <h3>Student GPA Records</h3>
+            <button id="scrollToTop" class="button" onclick="scroll_to_top()"><img src=" ../scroll_up.png" alt="Scroll to top"></button>
             <?php
             $records_query = $connect->prepare("
                 SELECT ss.identification_code, ss.semester_gpa 
@@ -276,7 +277,7 @@ if (isset($_POST["view_button"])) {
         // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+                showLogoutWarning("You will be logged out due to inactivity.", " ../logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
         setTimeout(function() {
@@ -288,7 +289,7 @@ if (isset($_POST["view_button"])) {
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
-            window.location.href = "logout.php";
+            window.location.href = " ../logout.php";
         }, remainingTime * 1000);
 
         // Scroll to top functionality

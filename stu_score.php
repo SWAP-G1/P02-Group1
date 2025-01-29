@@ -49,7 +49,7 @@ $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_nam
 // Check if the student is logged in (role_id = 3)
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 3) {
     // Redirect to login page if the user is not logged in as a student
-    header("Location: testlogin.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -87,19 +87,19 @@ $query_grades->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Scores</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href=" ../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="navbar">
         <div class="navbar-brand">
-            <img src="bwlogo-removebg.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <img src=" ../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-        <a href="stu_dashboard.php">Home</a>
-        <a href="logout.php">Logout</a>
+        <a href=" ../stu_dashboard.php">Home</a>
+        <a href=" ../logout.php">Logout</a>
         <a><?php echo htmlspecialchars($full_name); ?></a>
         </nav>
     </div>
@@ -196,7 +196,7 @@ $query_grades->close();
         // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+                showLogoutWarning("You will be logged out due to inactivity.", " ../logout.php");
             }, (remainingTime - finalWarningTime) * 1000);
         }
         setTimeout(function() {
@@ -208,7 +208,7 @@ $query_grades->close();
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
-            window.location.href = "logout.php";
+            window.location.href = " ../logout.php";
         }, remainingTime * 1000);
 
         // Scroll to top functionality

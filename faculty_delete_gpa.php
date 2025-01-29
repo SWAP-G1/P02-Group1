@@ -10,7 +10,7 @@ if ($connect->connect_error) {
 // Check if the user is logged in and has the correct role
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
     // Redirect to login page if the user is not logged in or not an admin
-    header("Location: faculty_gpa.php");
+    header("Location:  ../login.php");
     exit();
 }
 

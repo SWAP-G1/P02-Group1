@@ -10,7 +10,7 @@ if ($connect->connect_error) {
 // Check if the user is logged in and has the correct role
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
     // Redirect to login page if the user is not logged in or not an admin
-    header("Location: admin_gpa.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -19,8 +19,6 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Variable to hold the error message
-$error_message = '';
 
 // Function to check CSRF Token
 function check_csrf_token($csrf_token) {
