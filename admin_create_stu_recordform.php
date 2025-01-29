@@ -282,7 +282,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
 // Display each student record in the table
             foreach ($students as $student) {
-                if (preg_match('/^\d{3}[A-Z]$/', $student['identification_code'])) {
+                if (preg_match('/^S\d{3}$/', $student['identification_code'])) {
                     echo '<tr>';
                     echo '<td>' . htmlspecialchars($student['identification_code']) . '</td>';
                     echo '<td>' . htmlspecialchars($student['full_name']) . '</td>';
