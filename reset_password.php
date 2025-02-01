@@ -11,7 +11,16 @@ if (!$con) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $token = htmlspecialchars($_POST['token']);
-    $new_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // Check if passwords match
+    if ($password !== $confirm_password) {
+        header("Location: reset_password.php?token=" . urlencode($token) . "&error=" . urlencode("Passwords do not match."));
+        exit();
+    }
+
+    $new_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Verify token
     $stmt = $con->prepare("SELECT * FROM password_reset WHERE token = ?");
@@ -47,30 +56,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Password</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="navbar">
+        <div class="navbar-brand">
+            <img src="logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
+            <h1>XYZ Polytechnic Management</h1>
+        </div>
+    </div>
+
     <div class="container">
-        <h1 class="text-center">Reset Your Password</h1>
         <div class="card">
+            <h2 class="text-center" style="margin-bottom: 20px;">Password Reset Request</h2> 
             <?php
             if (isset($_GET['token'])) {
                 $token = htmlspecialchars($_GET['token']);
                 echo '<form method="POST" action="reset_password.php">
                         <input type="hidden" name="token" value="' . $token . '">
                         <div class="form-group">
-                            <label for="password">Enter your new password:</label>
-                            <input type="password" id="password" name="password" placeholder="New password" required>
+                            <input type="password" id="password" name="password" style="border-radius: 12px" placeholder="New password" required>
                         </div>
-                        <button type="submit" class="button">Reset Password</button>
+                        <div class="form-group">
+                            <input type="password" id="confirm_password" name="confirm_password" style="border-radius: 12px" placeholder="Confirm password" required>';
+                
+                // Display the error message if passwords do not match
+                if (isset($_GET['error'])) {
+                    echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                }
+
+                echo '</div>
+                      <button type="submit" class="button">Reset Password</button>
                       </form>';
-            } else if ($result->num_rows > 0) {
-                echo '<p>Password has been reset!</p>';
-            } else {
-                echo '<p>Invalid token.<p>';
-            }
+                } else if (isset($result) && $result->num_rows > 0) {
+                    echo '<p style="color: green; font-weight: bold;">
+                            Password has been successfully updated. Redirecting to login...
+                          </p>';
+                    echo '<script>
+                            setTimeout(function() {
+                                window.location.href = "hamizanlogin.php";
+                            }, 5000); // Redirects after 5 seconds
+                          </script>';
+                } else {
+                    echo '<p style="color: red; font-weight: bold;">Invalid token.</p>';
+                }
             ?>
         </div>
     </div>
+    <script>
+        setTimeout(function() {
+        const messageElement = document.getElementById('message');
+        if (messageElement) {
+            messageElement.style.display = 'none';
+        }
+        }, 10000);
+    
+    </script>
 </body>
 </html>

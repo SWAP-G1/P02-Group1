@@ -9,7 +9,7 @@ session_unset();
 session_destroy();
 
 // Redirect after 3 seconds
-header('Refresh: 3; url=testlogin.php');
+header('Refresh: 2; url=login.php');
 ?>
 
 <!DOCTYPE html>
@@ -24,9 +24,9 @@ header('Refresh: 3; url=testlogin.php');
 <body>
     <div class="container">
         <div class="card">
-            <h1 style="color: black;">Goodbye, <?php echo htmlspecialchars($full_name); ?>!</h1>
-            <p>You have successfully logged out. Redirecting you to the login page...</p>
-            <p>If you are not redirected, <a href="testlogin.php">click here</a>.</p>
+            <h1 style="color: white;">Goodbye, <?php echo htmlspecialchars($full_name); ?>!</h1>
+            <p style="margin-top: 20px;">You have successfully logged out. Redirecting you to the login page...</p>
+            <p>If you are not redirected, <a href="login.php">click here</a>.</p>
         </div>
     </div>
 </body>
