@@ -55,7 +55,7 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="navbar">
         <div class="navbar-brand">
             <img src="../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
-            <h1>Admin Course Management</h1>
+            <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
             <a href="../admin_dashboard.php">Home</a>
