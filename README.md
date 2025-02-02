@@ -1,3 +1,5 @@
+P02-GROUP 1
+
 // Database should be named xyz polytechnic
 // Project file should be pulled in C:\xampp\htdocs\SWAP\
 
@@ -8,7 +10,7 @@
 // Email: f102@email.com Pass: XYZfac2025#
 
 // Student
-// Email: s101@gmail.com Pass: XYZstu2025@ (for this account, reset password is not required as login_tracker is set to 1 for easier testing)
+// Email: s101@gmail.com Pass: XYZstu2025@
 
 - Start XAMPP and turn on Apache and MySQL services
 
