@@ -1,10 +1,11 @@
 <?php
+// Start the session
 session_start();
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600);
 define('WARNING_TIME', 60);
 define('FINAL_WARNING_TIME', 3);
-
+ 
 // Session timeout function remains the same
 function checkSessionTimeout() {
     if (isset($_SESSION['last_activity'])) {
@@ -111,6 +112,9 @@ if (isset($_POST["view_button"])) {
         ");
         $insert_query->bind_param('sd', $identification_code, $gpa);
         if ($insert_query->execute()) {
+            // Regenerate CSRF token after form submission
+            unset($_SESSION['csrf_token']);
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             header("Location: faculty_gpa.php?success=2");
         } else {
             header("Location: faculty_gpa.php?error=" . urlencode("Database error on insert"));
@@ -152,22 +156,22 @@ if (isset($_POST["view_button"])) {
             <?php
             // If ?success=1 is set in the URL, display a success message
             if (isset($_GET['success']) && $_GET['success'] == 1) {
-                echo '<div id="message" class="message">Student grade created successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade created successfully.</div>';
             }            
 
             // If ?success=2 is set in the URL, display an update success message
             if (isset($_GET['success']) && $_GET['success'] == 2) {
-                echo '<div id="message" class="message">Student grade updated successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade updated successfully.</div>';
             }
 
             // If ?success=3 is set in the URL, display a delete message
             if (isset($_GET['success']) && $_GET['success'] == 3) {
-                echo '<div id="message" class="message">Student grade deleted successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade deleted successfully.</div>';
             }
 
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="error-message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>

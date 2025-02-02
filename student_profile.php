@@ -107,6 +107,7 @@ $con->close();
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
+            <a href="stu_dashboard.php">Home</a>
             <a href="logout.php">Logout</a>
         </nav>
     </div>
@@ -164,7 +165,7 @@ $con->close();
             <?php endif; ?>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="forget_password.php">
+                <a href="password_reset_request.php">
                     <button type="button" class="btn">Change Password</button>
                 </a>
             </div>

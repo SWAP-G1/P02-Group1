@@ -38,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result && $row = $result->fetch_assoc()) {
         // Verify the password (stored using password_hash)
         if (password_verify($form_password, $row['password'])) {
+            session_regenerate_id(true); // Prevent session fixation attack
             // Set session variables
             $_SESSION['session_identification_code'] = $row['identification_code'];
             $_SESSION['session_full_name'] = $row['full_name'];

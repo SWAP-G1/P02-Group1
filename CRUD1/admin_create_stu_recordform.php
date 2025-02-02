@@ -1,5 +1,6 @@
 <?php
 session_start();
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
@@ -124,13 +125,13 @@ $diploma_result = mysqli_query($con, $diploma_query);
             }
             ?>
         </div>
-
+            
         <div class="card">
             <h3>Create Student Profile Form</h3>
             <form method="POST" action="admin_create_stu_record.php">
                 <div class="form-group">
                     <label class="label" for="student_name">Student Name</label>
-                    <input type="text" name="student_name" placeholder="Enter Student Name" required>
+                    <input type="text" name="student_name" placeholder="Enter Student Name" maxlength="255" required>
                 </div>
                 <div class="form-group">
                     <label class="label" for="phone_number">Phone Number</label>
@@ -273,9 +274,9 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     <th>Student ID</th>        
                     <th>Name</th>             
                     <th>Phone Number</th>    
-                    <th>Class Code 1</th>        
-                    <th>Class Code 2</th>        
-                    <th>Class Code 3</th>        
+                    <th>Class 1</th>        
+                    <th>Class 2</th>        
+                    <th>Class 3</th>        
                     <th>Diploma Name</th>        
                     <th colspan="2">Operations</th> 
                 </tr>';
@@ -291,8 +292,8 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     echo '<td>' . (!empty($student['class_code_2']) ? htmlspecialchars($student['class_code_2']) : 'No Class') . '</td>';
                     echo '<td>' . (!empty($student['class_code_3']) ? htmlspecialchars($student['class_code_3']) : 'No Class') . '</td>';
                     echo '<td>' . htmlspecialchars($student['diploma_name']) . '</td>';
-                    echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . urlencode($student['identification_code']) . '">Edit</a> </td>';
-                    echo '<td> <a href="admin_delete_stu_record.php?student_id=' . urlencode($student['identification_code']) . '&csrf_token=' . urlencode($_SESSION['csrf_token']) . '">Delete</a> </td>';
+                    echo '<td> <a href="admin_update_stu_recordform.php?student_id=' . htmlspecialchars($student['identification_code']) . '">Edit</a> </td>';
+                    echo "<td><a href='#' onclick='confirmDelete(\"" . htmlspecialchars($student['identification_code']) . "\", \"" . urlencode($_SESSION['csrf_token']) . "\")'>Delete</a></td>";
                     echo '</tr>';
                 }
             }
@@ -317,11 +318,20 @@ $diploma_result = mysqli_query($con, $diploma_query);
             <button id="logoutWarningButton">OK</button>
         </div>
     </div>
+    <div id="confirmationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="confirmationMessage"></p>
+            <button id="confirmationButton">Yes</button>
+            <button onclick="hideModal()">Cancel</button>
+        </div>
+    </div>
+
+
     <script>
-        // Remaining time in seconds (calculated in PHP)
+        // Remaining time in seconds (calculated in first part of the PHP)
         const remainingTime = <?php echo $remaining_time; ?>;
-        const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends
-        const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 3 seconds before logout
+        const warningTime = <?php echo WARNING_TIME; ?>; // Show warning 1 minute before session ends
+        const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Show final warning 3 seconds before logout
 
         // Function to show the logout warning modal
         function showLogoutWarning(message, redirectUrl = null) {
@@ -373,6 +383,27 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 top: 0,
                 behavior: 'smooth'
             });
+        }
+
+        function confirmDelete(studentId, csrfToken) {
+            const modal = document.getElementById("confirmationModal");
+            const modalMessage = document.getElementById("confirmationMessage");
+            const modalButton = document.getElementById("confirmationButton");
+
+    // Set the message and show the modal
+            modalMessage.innerText = "Are you sure you want to delete this?";
+            modal.style.display = "flex";
+
+    // Define what happens when the "OK" button is clicked
+            modalButton.onclick = function () {
+                window.location.href = `admin_delete_stu_record.php?student_id=${studentId}&csrf_token=${csrfToken}`;
+            };
+        }
+
+// This function is used to hide the modal if needed
+        function hideModal() {
+            const modal = document.getElementById("confirmationModal");
+            modal.style.display = "none";
         }
     </script>
 </body>

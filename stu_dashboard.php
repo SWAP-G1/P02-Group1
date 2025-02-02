@@ -1,6 +1,10 @@
 <?php
-session_start(); // Start the session
-
+session_start();
+unset($_SESSION['csrf_token']);
+define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
+define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
+define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
+session_regenerate_id(true);
 $con = mysqli_connect("localhost","root","","xyz polytechnic"); //connect to database
 if (!$con){
 	die('Could not connect: ' . mysqli_connect_errno()); //return error is connect fail
@@ -77,5 +81,55 @@ $identification_code = isset($_SESSION['session_identification_code']) ? $_SESSI
 <footer class="footer">
     <p>&copy; 2024 Polytechnic Management. All Rights Reserved.</p>
 </footer>
+<script>
+        // Remaining time in seconds (calculated in PHP)
+        const remainingTime = <?php echo $remaining_time; ?>;
+        const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends
+        const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 3 seconds before logout
+
+        // Function to show the logout warning modal
+        function showLogoutWarning(message, redirectUrl = null) {
+            const modal = document.getElementById("logoutWarningModal");
+            const modalMessage = document.getElementById("logoutWarningMessage");
+            const modalButton = document.getElementById("logoutWarningButton");
+
+            modalMessage.innerText = message;
+            modal.style.display = "flex";
+
+            modalButton.onclick = function () {
+                modal.style.display = "none";
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            };
+        }
+
+        // Notify user 1 minute before logout
+        if (remainingTime > warningTime) {
+            setTimeout(() => {
+                showLogoutWarning(
+                    "You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in."
+                );
+            }, (remainingTime - warningTime) * 1000);
+        }
+
+        // Final notification 3 seconds before logout
+        if (remainingTime > finalWarningTime) {
+            setTimeout(() => {
+                showLogoutWarning("You will be logged out due to inactivity.", "logout.php");
+            }, (remainingTime - finalWarningTime) * 1000);
+        }
+        setTimeout(function() {
+        const messageElement = document.getElementById('message');
+        if (messageElement) {
+            messageElement.style.display = 'none';
+        }
+        }, 10000);
+
+        // Automatically log the user out when the session expires
+        setTimeout(() => {
+            window.location.href = "logout.php";
+        }, remainingTime * 1000);
+    </script>
 </body>
 </html>

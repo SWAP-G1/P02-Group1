@@ -19,6 +19,9 @@ $del_classcode = htmlspecialchars($_GET["class_code"]);
 
 $stmt->bind_param('s', $del_classcode); // Bind the parameters
 if ($stmt->execute()) {
+    // Regenerate CSRF token after form submission
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     echo "Delete Query executed.";
     header("Location: admin_class_create_form.php?success=3");
     exit();

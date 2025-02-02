@@ -32,6 +32,9 @@ if (isset($_GET["student_id"])) {
 
             if ($stmt->execute()) {
                 $stmt->close();
+                    // Regenerate CSRF token after form submission
+                unset($_SESSION['csrf_token']);
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 header("Location: admin_create_stu_recordform.php?success=3");
                 exit();
             } else {

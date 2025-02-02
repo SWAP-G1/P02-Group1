@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+session_regenerate_id(true);
 // Define session timeout and other constants
 define('SESSION_TIMEOUT', 600); // 10 minutes
 define('WARNING_TIME', 60); // Warning 1 minute before timeout
@@ -102,14 +102,14 @@ if (!empty($student_id)) {
 
     // If no classes are found, set an error message
     if (empty($existing_classes)) {
-        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Error: Student record not found."));
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Student record not found."));
         exit();
     }
     
     // Validate student ID format (3 digits followed by 1 uppercase letter)
     $pattern_student_id = '/^S\d{3}$/';
     if (!preg_match($pattern_student_id, $student_id)) {
-        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must start with letter 'S' followed by 3 numbers."));
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must start with letter 'S' followed by 3 numbers."));
         exit();
     }
 }
@@ -181,7 +181,7 @@ $con->close();
 
                 <!-- Class Code 1 -->
                 <div class="form-group">
-                    <label class="label" for="class_code_1">Class Code 1</label>
+                    <label class="label" for="class_code_1">Class 1</label>
                     <select name="upd_class_code_1">
                         <option value="" <?php echo empty($existing_classes[0]['class_code']) ? 'selected' : ''; ?>>No Class</option>
                         <?php
@@ -197,7 +197,7 @@ $con->close();
 
                 <!-- Class Code 2 -->
                 <div class="form-group">
-                    <label class="label" for="class_code_2">Class Code 2</label>
+                    <label class="label" for="class_code_2">Class 2</label>
                     <select name="upd_class_code_2">
                         <option value="" <?php echo empty($existing_classes[1]['class_code']) ? 'selected' : ''; ?>>No Class</option>
                         <?php
@@ -213,7 +213,7 @@ $con->close();
 
                 <!-- Class Code 3 -->
                 <div class="form-group">
-                    <label class="label" for="class_code_3">Class Code 3</label>
+                    <label class="label" for="class_code_3">Class 3</label>
                     <select name="upd_class_code_3">
                         <option value="" <?php echo empty($existing_classes[2]['class_code']) ? 'selected' : ''; ?>>No Class</option>
                         <?php

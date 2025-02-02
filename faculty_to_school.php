@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600);
 define('WARNING_TIME', 60);
 define('FINAL_WARNING_TIME', 3);
@@ -110,7 +110,7 @@ $full_name = $_SESSION['session_full_name'] ?? "";
             echo '<div id="message" class="success-message">Faculty assigned successfully.</div>';
         }
         if (isset($_GET['error'])) {
-            echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+            echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
         }
         ?>
         <form method="POST" action="">

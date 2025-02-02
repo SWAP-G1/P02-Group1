@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600);
 define('WARNING_TIME', 60);
 define('FINAL_WARNING_TIME', 3);
@@ -59,6 +59,13 @@ $stmt = $con->prepare("SELECT * FROM class WHERE class_code = ?");
 $stmt->bind_param('s', $edit_classcode);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Error message for non-existant classes
+if ($result->num_rows === 0) {
+    header("Location: admin_class_create_form.php?error=" . urlencode("Class code \"$edit_classcode\" does not exist."));
+    exit();
+}
+
 $class_row = $result->fetch_assoc();
 ?>
 

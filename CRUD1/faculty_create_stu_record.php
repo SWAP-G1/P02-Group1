@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 // Validate CSRF token
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Verify CSRF token
@@ -12,8 +13,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$con) {
         die('Could not connect: ' . mysqli_connect_errno());
     }
+
     // Retrieve form data and sanitize inputs
-    $student_name = htmlspecialchars(trim($_POST["student_name"]));
+    $student_name = strtoupper(htmlspecialchars(trim($_POST["student_name"])));
     $phone_number = htmlspecialchars(trim($_POST["phone_number"]));
     $student_id_code = strtoupper(htmlspecialchars(trim($_POST["student_id_code"])));
     $class_codes = [
@@ -46,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $non_null_class_codes = array_filter($class_codes);
     if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
-        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Ensure that all class codes are unique."));
+        header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Ensure that all classes are unique."));
         exit();
     }
 
@@ -174,6 +176,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($success) {
         $con->commit();
+            // Regenerate CSRF token after form submission
+        unset($_SESSION['csrf_token']);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         header("Location: faculty_create_stu_recordform.php?success=1");
         exit();
     }

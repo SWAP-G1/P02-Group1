@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600);
 define('WARNING_TIME', 60);
 define('FINAL_WARNING_TIME', 3);
@@ -186,6 +186,14 @@ if (empty($_SESSION['csrf_token'])) {
     <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
 </footer>
 
+<div id="confirmationModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <p id="confirmationMessage"></p>
+        <button id="confirmationButton">Yes</button>
+        <button onclick="hideModal()">Cancel</button>
+    </div>
+</div>
+
 <script>
     function validateDates() {
         const startDate = document.getElementById('start_date').value;
@@ -198,11 +206,28 @@ if (empty($_SESSION['csrf_token'])) {
         return true;
     }
 
-    function confirmDelete(courseCode) {
-        if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+    function confirmDelete(courseCode, csrfToken) {
+        const modal = document.getElementById("confirmationModal");
+        const modalMessage = document.getElementById("confirmationMessage");
+        const modalButton = document.getElementById("confirmationButton");
+
+    // Set the message and show the modal
+        modalMessage.innerText = "Are you sure you want to delete this?";
+        modal.style.display = "flex";
+
+    // Define what happens when the "OK" button is clicked
+        modalButton.onclick = function () {
             window.location.href = 'admin_course_delete.php?course_code=' + courseCode + '&csrf_token=<?= $_SESSION['csrf_token'] ?>';
-        }
+        };
     }
+
+// This function is used to hide the modal if needed
+    function hideModal() {
+        const modal = document.getElementById("confirmationModal");
+        modal.style.display = "none";
+    }
+
+
 
     const remainingTime = <?php echo $remaining_time; ?>;
     const warningTime = <?php echo WARNING_TIME; ?>;

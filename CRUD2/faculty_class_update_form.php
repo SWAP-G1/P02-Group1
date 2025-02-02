@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600);
 define('WARNING_TIME', 60);
 define('FINAL_WARNING_TIME', 3);
@@ -94,7 +94,7 @@ $class_stmt->execute();
 $class_result = $class_stmt->get_result();
 
 if ($class_result->num_rows === 0) {
-    header("Location: faculty_class_create_form.php");
+    header("Location: faculty_class_create_form.php?error=" . urlencode("Class code \"$edit_classcode\" does not exist."));
     exit();
 }
 
@@ -130,7 +130,7 @@ $class_row = $class_result->fetch_assoc();
             <?php
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             // If ?success=2 is set in the URL, display an update success message
             if (isset($_GET['success']) && $_GET['success'] == 2) {

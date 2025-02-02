@@ -55,6 +55,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Execute the query
             if ($stmt->execute()) {
+                    // Regenerate CSRF token after form submission
+                unset($_SESSION['csrf_token']);
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 header("Location: admin_class_create_form.php?success=2");
                 exit();
             } else {

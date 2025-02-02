@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 30, 2025 at 04:44 PM
+-- Generation Time: Feb 02, 2025 at 07:49 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -67,9 +67,9 @@ CREATE TABLE `course` (
   `course_code` varchar(3) NOT NULL,
   `course_name` varchar(50) NOT NULL,
   `diploma_code` varchar(5) NOT NULL,
-  `course_start_date` date NOT NULL,
-  `course_end_date` date NOT NULL,
-  `status` enum('To start','In-progress','Ended') DEFAULT NULL
+  `course_start_date` date DEFAULT NULL,
+  `course_end_date` date DEFAULT NULL,
+  `status` enum('To start','No Status','In-progress','Ended') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -77,10 +77,11 @@ CREATE TABLE `course` (
 --
 
 INSERT INTO `course` (`course_code`, `course_name`, `diploma_code`, `course_start_date`, `course_end_date`, `status`) VALUES
-('B01', 'Business Administration', 'DPBM', '2025-01-15', '2025-05-15', 'In-progress'),
+('B01', 'Business Administration', 'DPBM', '2222-05-06', '4444-04-04', 'In-progress'),
 ('B02', 'Marketing Principles', 'DPBM', '2025-01-15', '2025-05-15', 'In-progress'),
-('B03', 'FINANCIAL BANKING', 'DPBM', '1111-11-11', '0002-02-22', ''),
-('B04', 'FINANCIAL INVESTING', 'DPBM', '2222-02-22', '1111-11-11', ''),
+('B03', 'test', 'DPBM', '0000-00-00', '0000-00-00', 'No Status'),
+('B04', 'test2', 'DPBM', NULL, NULL, 'No Status'),
+('B05', 'test3', 'DPBM', NULL, NULL, 'No Status'),
 ('D01', 'Industrial Design Basics', 'DPID', '2025-01-15', '2025-05-15', 'In-progress'),
 ('D02', 'Product Design', 'DPID', '2025-01-15', '2025-05-15', 'In-progress'),
 ('E21', 'Circuit Theory', 'DPEE', '2025-01-15', '2025-05-15', 'In-progress'),
@@ -171,7 +172,8 @@ INSERT INTO `password_reset` (`id`, `email`, `token`, `created_at`) VALUES
 (4, 'hamizvn@gmail.com', '31bd37094063ff678541273b5eb283a11430fc888f867e49d6d5e753ab77c722c55a559a93a9b6a335befe279271439e9221', '2025-01-30 14:40:58'),
 (5, 'hamizvn@gmail.com', '8351dae793959fd8ee1b5a697bce1a40b9b9aa6c723faa5feb564afcd65803edcfb51c517344b185b1c01706d51616d68680', '2025-01-30 14:42:23'),
 (6, 'hamizvn@gmail.com', '50a2e36b8a698286bbd726eb5ae9fb086e6d63039cd96cb95372df53760cd43b8bbae64779f6a0ef454394b6269e0571f0f3', '2025-01-30 15:03:37'),
-(7, 's102@gmail.com', '7663e2327903bb9ae3a26d26fb854f31e3b760554589f8ecd06b6855abb82d8744200e7c37a97ad4c4473dd105ec1d694f9c', '2025-01-30 15:28:15');
+(7, 's102@gmail.com', '7663e2327903bb9ae3a26d26fb854f31e3b760554589f8ecd06b6855abb82d8744200e7c37a97ad4c4473dd105ec1d694f9c', '2025-01-30 15:28:15'),
+(8, 'hamizvn@gmail.com', 'c84ecdb3a063db7c46dc631b15b88038ee7ddbb592b26a46c9b61b4aca52b51ef7527a44be4d61089bcb121c2e7c1996dc2d', '2025-01-31 13:24:58');
 
 -- --------------------------------------------------------
 
@@ -253,24 +255,54 @@ CREATE TABLE `student` (
 --
 
 INSERT INTO `student` (`identification_code`, `diploma_code`, `class_code`) VALUES
-('S101', 'DPIT', 'IT01'),
-('S102', 'DPIT', 'IT02'),
-('S103', 'DPIS', 'IT03'),
-('S104', 'DPIS', 'IT04'),
 ('S202', 'DPBM', 'BU02'),
-('S203', 'DPFN', 'BU03'),
-('S204', 'DPFN', 'BU04'),
-('S301', 'DPME', 'EG01'),
-('S302', 'DPME', 'EG02'),
-('S303', 'DPEE', 'EG03'),
+('S202', 'DPBM', NULL),
+('S202', 'DPBM', NULL),
 ('S304', 'DPEE', 'EG04'),
-('S401', 'DPID', 'DS01'),
-('S402', 'DPID', 'DS02'),
-('S403', 'DPMD', 'DS03'),
+('S304', 'DPEE', NULL),
+('S304', 'DPEE', NULL),
+('S101', 'DPIT', 'IT01'),
+('S101', 'DPIT', NULL),
+('S101', 'DPIT', NULL),
+('S102', 'DPIT', 'IT02'),
+('S102', 'DPIT', NULL),
+('S102', 'DPIT', NULL),
+('S103', 'DPIS', 'IT03'),
+('S103', 'DPIS', NULL),
+('S103', 'DPIS', NULL),
+('S104', 'DPIS', 'IT04'),
+('S104', 'DPIS', NULL),
+('S104', 'DPIS', NULL),
+('S203', 'DPFN', 'BU03'),
+('S203', 'DPFN', NULL),
+('S203', 'DPFN', NULL),
+('S204', 'DPFN', 'BU04'),
+('S204', 'DPFN', NULL),
+('S204', 'DPFN', NULL),
+('S302', 'DPME', 'EG02'),
+('S302', 'DPME', NULL),
+('S302', 'DPME', NULL),
 ('S404', 'DPMD', 'DS04'),
+('S404', 'DPMD', NULL),
+('S404', 'DPMD', NULL),
+('S403', 'DPMD', 'DS03'),
+('S403', 'DPMD', NULL),
+('S403', 'DPMD', NULL),
+('S401', 'DPID', 'DS01'),
+('S401', 'DPID', NULL),
+('S401', 'DPID', NULL),
+('S402', 'DPID', 'DS02'),
+('S402', 'DPID', NULL),
+('S402', 'DPID', NULL),
 ('S201', 'DPBM', 'BU01'),
 ('S201', 'DPBM', 'BU02'),
-('S201', 'DPBM', 'BU03');
+('S201', 'DPBM', 'BU03'),
+('S301', 'DPME', 'EG01'),
+('S301', 'DPME', NULL),
+('S301', 'DPME', NULL),
+('S303', 'DPEE', 'EG03'),
+('S303', 'DPEE', NULL),
+('S303', 'DPEE', NULL);
 
 -- --------------------------------------------------------
 
@@ -322,22 +354,23 @@ INSERT INTO `user` (`identification_code`, `email`, `password`, `role_id`, `phon
 ('F106', 'f106@gmail.com', '$2y$10$YKNsMbM8nGlMWqcnMSVCDeqyb.gfOdjQXB2.QsvA/ObPkO6w6GRN.', 2, 87654325, 'SITI ALYA', 1),
 ('F107', 'f107@gmail.com', '$2y$10$YKNsMbM8nGlMWqcnMSVCDeqyb.gfOdjQXB2.QsvA/ObPkO6w6GRN.', 2, 87654326, 'NUR AMANDA', 1),
 ('F108', 'f108@gmail.com', '$2y$10$YKNsMbM8nGlMWqcnMSVCDeqyb.gfOdjQXB2.QsvA/ObPkO6w6GRN.', 2, 87654327, 'ILHAN JIUN', 1),
-('S101', 'hamizvn@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234561, 'LEE WEI', 1),
-('S102', 's102@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234562, 'TAN MEI', 0),
-('S103', 's103@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234563, 'WONG HAO', 0),
-('S104', 's104@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234564, 'CHEN XIONG', 0),
-('S201', 'S201@student.xyz.sg', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234561, 'NURUL IMAN', 0),
-('S202', 's202@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234562, 'RAHMAN SHAH', 0),
-('S203', 's203@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234563, 'SITI ZUBAIDAH', 0),
-('S204', 's204@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234564, 'MUHAMAD RIZAL', 0),
-('S301', 'chatgptacc987@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234565, 'LIM HONG', 0),
-('S302', 's302@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234566, 'NG CHENG', 0),
-('S303', 's303@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234567, 'KOH YUAN', 0),
-('S304', 's304@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234568, 'ZHANG WEI', 0),
-('S401', 'syedalwee07@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234565, 'DEWI PUTRI', 0),
-('S402', 's402@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234566, 'RAVI KUMAR', 0),
-('S403', 's403@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234567, 'MEI LING', 1),
-('S404', 's404@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234568, 'PARK MIN', 1);
+('F109', 'f109@gmail.com', '$2y$10$twztr.y8nqA4yoE28ZmA8umvMKZXk/8GYCZBMw3HadTyBv6qRT.Oe', 2, 93893583, 'TEST FACULTY', 1),
+('S101', 'S101@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234561, 'LEE WEI', 1),
+('S102', 'S102@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234562, 'TAN MEI', 0),
+('S103', 'S103@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234563, 'WONG HAO', 0),
+('S104', 'S104@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234564, 'CHEN XIONG', 0),
+('S201', 'S201@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234569, 'NURUL IMAN', 0),
+('S202', 'S202@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234562, 'RAHMAN SHAH', 0),
+('S203', 'S203@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234563, 'SITI ZUBAIDAH', 0),
+('S204', 'S204@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234564, 'MUHAMAD RIZAL', 0),
+('S301', 'S301@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234565, 'LIM HONG', 0),
+('S302', 'S302@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234566, 'NG CHENG', 0),
+('S303', 'S311@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234569, 'KOH YUAN', 0),
+('S304', 'S304@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 91234568, 'ZHANG WEI', 0),
+('S401', 'S401@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234565, 'DEWI PUTRI', 0),
+('S402', 'S402@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234566, 'RAVI KUMAR', 0),
+('S403', 'S403@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234567, 'MEI LING', 1),
+('S404', 'S404@gmail.com', '$2y$10$t1Yb0LEVO8/CDTKrBL81.eKv95nI3cDvZCm9Q/tMLY34rNv2s5QHG', 3, 81234568, 'PARK MIN', 1);
 
 --
 -- Indexes for dumped tables
@@ -429,7 +462,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `password_reset`
 --
 ALTER TABLE `password_reset`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `semester_gpa_to_course_code`

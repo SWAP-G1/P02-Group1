@@ -20,7 +20,10 @@ $del_coursecode = htmlspecialchars($_GET["course_code"]);
 $stmt->bind_param('s', $del_coursecode); // Bind the parameters
 if ($stmt->execute()) {
     echo "Delete Query executed.";
-    header("location:admin_course_create_form.php");
+    // Regenerate CSRF token after form submission
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    header("location:admin_course_create_form.php?success=3");
     exit();
 } else {
     echo "Error executing DELETE query.";

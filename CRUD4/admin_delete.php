@@ -1,7 +1,8 @@
 <?php
+// Start the session
 session_start();
-
-// Connect to the database 'xyz polytechnic'
+session_regenerate_id(true);
+// Connect to the database 'xyz polytechnic_danial'
 $connect = mysqli_connect("localhost", "root", "", "xyz polytechnic");
 if ($connect->connect_error) {
     die("Connection failed: " . $connect->connect_error);
@@ -18,6 +19,7 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
 
 // Function to check CSRF Token
 function check_csrf_token($csrf_token) {
@@ -69,6 +71,9 @@ if (isset($_GET['operation']) && $_GET['operation'] == 'delete') {
         $delete_query = $connect->prepare("DELETE FROM semester_gpa_to_course_code WHERE grade_id=?");
         $delete_query->bind_param('i', $id);
         if ($delete_query->execute()) {
+            // Regenerate CSRF token after form submission
+            unset($_SESSION['csrf_token']);
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             header("Location: admin_score.php?success=3");
             exit();
         } else {

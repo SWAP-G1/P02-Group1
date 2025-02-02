@@ -1,6 +1,6 @@
 <?php
 session_start(); // Start the session
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
@@ -135,7 +135,7 @@ $faculty_result = $faculty_stmt->get_result();
 
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>

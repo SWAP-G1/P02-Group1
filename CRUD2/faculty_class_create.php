@@ -8,7 +8,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $con = mysqli_connect("localhost", "root", "", "xyz polytechnic");
     if (!$con) die('Connection failed: ' . mysqli_connect_error());
-
+    // Regenerate CSRF token after form submission
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     // Get logged-in faculty's school
     $faculty_id = $_SESSION['session_identification_code'];
     $school_stmt = $con->prepare("SELECT school_code FROM faculty WHERE faculty_identification_code = ?");
@@ -89,6 +91,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $insert_stmt->bind_param('ssss', $class_code, $course_code, $class_type, $faculty_id_code);
     
     if ($insert_stmt->execute()) {
+            // Regenerate CSRF token after form submission
+        unset($_SESSION['csrf_token']);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         header("Location: faculty_class_create_form.php?success=1");
     } else {
         header("Location: faculty_class_create_form.php?error=" . urlencode("Error creating class: " . $con->error));

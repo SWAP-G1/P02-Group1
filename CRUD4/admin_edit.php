@@ -1,10 +1,12 @@
 <?php
+// Start the session
 session_start();
+session_regenerate_id(true);
 
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
-
+ 
 // Function to check and handle session timeout
 function checkSessionTimeout() {
     if (isset($_SESSION['last_activity'])) {
@@ -119,6 +121,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_button'])) {
     $update_query = $connect->prepare("UPDATE semester_gpa_to_course_code SET course_score = ?, grade = ? WHERE grade_id = ?");
     $update_query->bind_param('dsi', $course_score, $grade, $id);
     if ($update_query->execute()) {
+        // Regenerate CSRF token after form submission
+        unset($_SESSION['csrf_token']);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         header("Location: admin_score.php?success=2");
         exit();
     } else {
@@ -164,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_button'])) {
 
             // If ?success=2 is set in the URL, display an update success message
             if (isset($_GET['success']) && $_GET['success'] == 2) {
-                echo '<div id="message" class="message">Class updated successfully.</div>';
+                echo '<div id="message" class="success-message">Class updated successfully.</div>';
             }
             ?>
         </div>

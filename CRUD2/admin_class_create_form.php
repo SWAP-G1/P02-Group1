@@ -1,6 +1,6 @@
 <?php
 session_start(); // Start the session
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
@@ -202,7 +202,7 @@ $faculty_result = mysqli_query($con, $faculty_query);
                 echo '<td>' . htmlspecialchars($class_row['class_type']) . '</td>';
                 echo '<td>' . htmlspecialchars($faculty_name) . '</td>';
                 echo '<td> <a href="admin_class_update_form.php?class_code=' . htmlspecialchars($class_row['class_code']) . '">Edit</a> </td>';
-                echo '<td> <a href="admin_class_delete.php?class_code=' . htmlspecialchars($class_row['class_code']) . '&csrf_token=' . $_SESSION['csrf_token'] . '">Delete</a> </td>';
+                echo "<td><a href='#' onclick='confirmDelete(\"" . htmlspecialchars($class_row['class_code']) . "\", \"" . htmlspecialchars($_SESSION['csrf_token']) . "\")'>Delete</a></td>";
                 echo '</tr>';
             }
             echo '</table>';
@@ -221,7 +221,37 @@ $faculty_result = mysqli_query($con, $faculty_query);
         </div>
     </div>
 
+    <div id="confirmationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="confirmationMessage"></p>
+            <button id="confirmationButton">Yes</button>
+            <button onclick="hideModal()">Cancel</button>
+        </div>
+    </div>
+
     <script>
+        function confirmDelete(classCode, csrfToken) {
+            const modal = document.getElementById("confirmationModal");
+            const modalMessage = document.getElementById("confirmationMessage");
+            const modalButton = document.getElementById("confirmationButton");
+
+    // Set the message and show the modal
+            modalMessage.innerText = "Are you sure you want to delete this?";
+            modal.style.display = "flex";
+
+    // Define what happens when the "OK" button is clicked
+            modalButton.onclick = function () {
+                window.location.href = `admin_class_delete.php?class_code=${classCode}&csrf_token=${csrfToken}`;
+            };
+        }
+
+// This function is used to hide the modal if needed
+        function hideModal() {
+            const modal = document.getElementById("confirmationModal");
+            modal.style.display = "none";
+        }
+
+
         // Remaining time in seconds (calculated in PHP)
         const remainingTime = <?php echo $remaining_time; ?>;
         const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends

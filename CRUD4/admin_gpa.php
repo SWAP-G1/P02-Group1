@@ -1,10 +1,12 @@
 <?php
+// Start the session
 session_start();
+session_regenerate_id(true);
 
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
-
+ 
 // Function to check and handle session timeout
 function checkSessionTimeout() {
     if (isset($_SESSION['last_activity'])) {
@@ -87,6 +89,9 @@ if (isset($_POST["view_button"])) {
                 $update_query = $connect->prepare("UPDATE student_score SET semester_gpa = ? WHERE identification_code = ?");
                 $update_query->bind_param('ds', $gpa, $identification_code);
                 if ($update_query->execute()) {
+                        // Regenerate CSRF token after form submission
+                    unset($_SESSION['csrf_token']);
+                    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     header("Location: admin_gpa.php?success=2");
                     exit();
                 } else {
@@ -99,6 +104,9 @@ if (isset($_POST["view_button"])) {
                 $insert_query = $connect->prepare("INSERT INTO student_score (identification_code, semester_gpa) VALUES (?, ?)");
                 $insert_query->bind_param('sd', $identification_code, $gpa);
                 if ($insert_query->execute()) {
+                        // Regenerate CSRF token after form submission
+                    unset($_SESSION['csrf_token']);
+                    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     header("Location: admin_gpa.php?success=2");
                     exit();
                 } else {
@@ -145,22 +153,22 @@ if (isset($_POST["view_button"])) {
             <?php
             // If ?success=1 is set in the URL, display a success message
             if (isset($_GET['success']) && $_GET['success'] == 1) {
-                echo '<div id="message" class="message">Student grade created successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade created successfully.</div>';
             }            
 
             // If ?success=2 is set in the URL, display an update success message
             if (isset($_GET['success']) && $_GET['success'] == 2) {
-                echo '<div id="message" class="message">Student grade updated successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade updated successfully.</div>';
             }
 
             // If ?success=3 is set in the URL, display a delete message
             if (isset($_GET['success']) && $_GET['success'] == 3) {
-                echo '<div id="message" class="message">Student grade deleted successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade deleted successfully.</div>';
             }
 
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="error-message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>
@@ -178,7 +186,7 @@ if (isset($_POST["view_button"])) {
                         while ($row = $result->fetch_assoc()) {
                             // Check if the current value is selected
                             $selected = isset($_POST['identification_code']) && $_POST['identification_code'] === $row['identification_code'] ? 'selected' : '';
-                            echo "<option value='" . htmlspecialchars($row['identification_code'], ENT_QUOTES, 'UTF-8') . "' $selected>" . htmlspecialchars($row['identification_code'], ENT_QUOTES, 'UTF-8') . "</option>";
+                            echo "<option value='" . htmlspecialchars($row['identification_code']) . "' $selected>" . htmlspecialchars($row['identification_code']) . "</option>";
                         }
                         ?>
                     </select>
@@ -208,9 +216,9 @@ if (isset($_POST["view_button"])) {
             // Extract the data row by row
             while ($query->fetch()) {
                 echo "<tr>";
-                echo "<td>" . htmlspecialchars($identification_code, ENT_QUOTES, 'UTF-8') . "</td>";
-                echo "<td>" . htmlspecialchars(number_format($gpa, 2), ENT_QUOTES, 'UTF-8') . "</td>";
-                echo "<td><a href='admin_delete_gpa.php?operation=delete&id=" . htmlspecialchars($identification_code, ENT_QUOTES, 'UTF-8') . "&csrf_token=" . $_SESSION['csrf_token'] . "'>Delete</a></td>";
+                echo "<td>" . htmlspecialchars($identification_code) . "</td>";
+                echo "<td>" . htmlspecialchars(number_format($gpa, 2)) . "</td>";
+                echo "<td><a href='#' onclick='confirmDelete(\"" . htmlspecialchars($identification_code) . "\", \"" . htmlspecialchars($_SESSION['csrf_token']) . "\")'>Delete</a></td>";
                 echo "</tr>";
             }
             echo "</table>";
@@ -229,6 +237,14 @@ if (isset($_POST["view_button"])) {
         <div class="modal-content">
             <p id="logoutWarningMessage"></p>
             <button id="logoutWarningButton">OK</button>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="confirmationMessage"></p>
+            <button id="confirmationButton">Yes</button>
+            <button onclick="hideModal()">Cancel</button>
         </div>
     </div>
 
@@ -289,6 +305,28 @@ if (isset($_POST["view_button"])) {
                 behavior: 'smooth'
             });
         }
+
+    function confirmDelete(identification_code, csrfToken) {
+        const modal = document.getElementById("confirmationModal");
+        const modalMessage = document.getElementById("confirmationMessage");
+        const modalButton = document.getElementById("confirmationButton");
+
+    // Set the message and show the modal
+        modalMessage.innerText = "Are you sure you want to delete this?";
+        modal.style.display = "flex";
+
+    // Define what happens when the "OK" button is clicked
+        modalButton.onclick = function () {
+            window.location.href = `admin_delete_gpa.php?operation=delete&identification_code=${identification_code}&csrf_token=${csrfToken}`;
+        };
+    }
+
+// This function is used to hide the modal if needed
+    function hideModal() {
+        const modal = document.getElementById("confirmationModal");
+        modal.style.display = "none";
+    }
+
     </script>
 
 </body>

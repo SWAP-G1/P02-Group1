@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$con) {
         die('Could not connect: ' . mysqli_connect_errno());
     }
+
     // Retrieve form data
     $class_code = isset($_POST["class_code"]) ? htmlspecialchars($_POST["class_code"]) : "";
     $course_code = isset($_POST["course_code"]) ? htmlspecialchars($_POST["course_code"]) : "";
@@ -51,6 +52,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param('ssss', $class_code, $course_code, $class_type, $faculty_identification_code);
             // Execute the query
             if ($stmt->execute()) {
+                    // Regenerate CSRF token after form submission
+                unset($_SESSION['csrf_token']);
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 header("Location: admin_class_create_form.php?success=1");
                 exit();
             } else {

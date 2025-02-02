@@ -1,10 +1,12 @@
 <?php
+// Start the session
 session_start();
+session_regenerate_id(true);
 
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
-
+ 
 // Function to check and handle session timeout
 function checkSessionTimeout() {
     if (isset($_SESSION['last_activity'])) {
@@ -137,6 +139,9 @@ if (isset($_POST["insert_button"])) {
                 $query = $connect->prepare("INSERT INTO semester_gpa_to_course_code (grade_id, identification_code, course_code, course_score, grade) VALUES (NULL, ?, ?, ?, ?)");
                 $query->bind_param('ssds', $identification_code, $course_code, $course_score, $grade); // Bind the parameters
                 if ($query->execute()) {
+                    // Regenerate CSRF token after form submission
+                    unset($_SESSION['csrf_token']);
+                    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     header("Location: admin_score.php?success=1");
                     exit();
                 }
@@ -195,22 +200,22 @@ if (isset($_POST["update_button"])) {
             <?php
             // If ?success=1 is set in the URL, display a success message
             if (isset($_GET['success']) && $_GET['success'] == 1) {
-                echo '<div id="message" class="message">Student grade created successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade created successfully.</div>';
             }            
 
             // If ?success=2 is set in the URL, display an update success message
             if (isset($_GET['success']) && $_GET['success'] == 2) {
-                echo '<div id="message" class="message">Student grade updated successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade updated successfully.</div>';
             }
 
             // If ?success=3 is set in the URL, display a delete message
             if (isset($_GET['success']) && $_GET['success'] == 3) {
-                echo '<div id="message" class="message">Student grade deleted successfully.</div>';
+                echo '<div id="message" class="success-message">Student grade deleted successfully.</div>';
             }
 
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="error-message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>
@@ -228,7 +233,7 @@ if (isset($_POST["update_button"])) {
                         while ($row = $result->fetch_assoc()) {
                             // Check if the current value is selected
                             $selected = isset($_POST['identification_code']) && $_POST['identification_code'] === $row['identification_code'] ? 'selected' : '';
-                            echo "<option value='" . htmlspecialchars($row['identification_code'], ENT_QUOTES, 'UTF-8') . "' $selected>" . htmlspecialchars($row['identification_code'], ENT_QUOTES, 'UTF-8') . "</option>";
+                            echo "<option value='" . htmlspecialchars($row['identification_code']) . "' $selected>" . htmlspecialchars($row['identification_code']) . "</option>";
                         }
                         ?>
                     </select>
@@ -243,17 +248,17 @@ if (isset($_POST["update_button"])) {
                         while ($row = $result->fetch_assoc()) {
                             // Check if the current value is selected
                             $selected = isset($_POST['course_code']) && $_POST['course_code'] === $row['course_code'] ? 'selected' : '';
-                            echo "<option value='" . htmlspecialchars($row['course_code'], ENT_QUOTES, 'UTF-8') . "' $selected>" . htmlspecialchars($row['course_code'], ENT_QUOTES, 'UTF-8') . "</option>";
+                            echo "<option value='" . htmlspecialchars($row['course_code']) . "' $selected>" . htmlspecialchars($row['course_code']) . "</option>";
                         }
                         ?>
                     </select>
                 </div>
                 <div class="form-group">
                     <label class="label" for="course_score">Course Score</label>
-                    <td><input type="text" name="course_score" value="<?php echo isset($_POST['course_score']) ? htmlspecialchars($_POST['course_score'], ENT_QUOTES, 'UTF-8') : ''; ?>" required/>
+                    <td><input type="text" name="course_score" value="<?php echo isset($_POST['course_score']) ? htmlspecialchars($_POST['course_score']) : ''; ?>" required/>
                 </div>
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                <input type="hidden" name="id" value="<?php echo isset($_GET['id']) ? htmlspecialchars($_GET['id'], ENT_QUOTES, 'UTF-8') : ''; ?>" />
+                <input type="hidden" name="id" value="<?php echo isset($_GET['id']) ? htmlspecialchars($_GET['id']) : ''; ?>" />
                 <input type="hidden" name="insert" value="yes" />
                 <button type="submit" name="insert_button" value="Insert Score" >Insert Score</button>
             </form>
@@ -280,12 +285,12 @@ if (isset($_POST["update_button"])) {
             // Extract the data row by row
             while ($query->fetch()) {
                 echo '<tr>';
-                echo "<td>" . htmlspecialchars($identification_code, ENT_QUOTES, 'UTF-8') . "</td>";
-                echo "<td>" . htmlspecialchars($course_code, ENT_QUOTES, 'UTF-8') . "</td>";
-                echo "<td>" . htmlspecialchars($course_score, ENT_QUOTES, 'UTF-8') . "</td>";
-                echo "<td>" . htmlspecialchars($grade, ENT_QUOTES, 'UTF-8') . "</td>";
-                echo "<td><a href='admin_edit.php?operation=edit&id=" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "&identification_code" . htmlspecialchars($identification_code, ENT_QUOTES, 'UTF-8') . "&course_code=" . htmlspecialchars($course_code, ENT_QUOTES, 'UTF-8') . "&course_score=" . htmlspecialchars($course_score, ENT_QUOTES, 'UTF-8') . "&grade=" . htmlspecialchars($grade, ENT_QUOTES, 'UTF-8') . "'>Edit</a></td>";
-                echo "<td><a href='admin_delete.php?operation=delete&id=" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "&csrf_token=" . $_SESSION['csrf_token'] . "'>Delete</a></td>";
+                echo "<td>" . htmlspecialchars($identification_code) . "</td>";
+                echo "<td>" . htmlspecialchars($course_code) . "</td>";
+                echo "<td>" . htmlspecialchars($course_score) . "</td>";
+                echo "<td>" . htmlspecialchars($grade) . "</td>";
+                echo "<td><a href='admin_edit.php?operation=edit&id=" . htmlspecialchars($id) . "&identification_code" . htmlspecialchars($identification_code) . "&course_code=" . htmlspecialchars($course_code) . "&course_score=" . htmlspecialchars($course_score) . "&grade=" . htmlspecialchars($grade) . "'>Edit</a></td>";
+                echo "<td><a href='#' onclick='confirmDelete(\"" . htmlspecialchars($id) . "\", \"" . htmlspecialchars($_SESSION['csrf_token']) . "\")'>Delete</a></td>";
                 echo '</tr>';
             }
 
@@ -307,6 +312,14 @@ if (isset($_POST["update_button"])) {
             <button id="logoutWarningButton">OK</button>
         </div>
     </div>
+    <div id="confirmationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="confirmationMessage"></p>
+            <button id="confirmationButton">Yes</button>
+            <button onclick="hideModal()">Cancel</button>
+        </div>
+    </div>
+
 
     <script>
         // Remaining time in seconds (calculated in PHP)
@@ -365,6 +378,29 @@ if (isset($_POST["update_button"])) {
                 behavior: 'smooth'
             });
         }
+        
+    function confirmDelete(id, csrfToken) {
+        const modal = document.getElementById("confirmationModal");
+        const modalMessage = document.getElementById("confirmationMessage");
+        const modalButton = document.getElementById("confirmationButton");
+
+    // Set the message and show the modal
+        modalMessage.innerText = "Are you sure you want to delete this?";
+        modal.style.display = "flex";
+
+    // Define what happens when the "OK" button is clicked
+        modalButton.onclick = function () {
+            window.location.href = `admin_delete.php?operation=delete&id=${id}&csrf_token=${csrfToken}`;
+        };
+    }
+
+// This function is used to hide the modal if needed
+    function hideModal() {
+        const modal = document.getElementById("confirmationModal");
+        modal.style.display = "none";
+    }
+
+// This part assumes you have a modal div in your HTML as described earlier
     </script>
 
 </body>

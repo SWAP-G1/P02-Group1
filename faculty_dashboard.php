@@ -1,9 +1,10 @@
 <?php
-session_start(); // Start the session
+session_start();
+unset($_SESSION['csrf_token']);
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
-
+session_regenerate_id(true);
 // Function to check and handle session timeout
 function checkSessionTimeout() {
     if (isset($_SESSION['last_activity'])) {

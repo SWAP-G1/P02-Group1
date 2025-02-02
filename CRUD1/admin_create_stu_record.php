@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Retrieve form data and sanitize inputs
-    $student_name = htmlspecialchars(trim($_POST["student_name"]));
+    $student_name = strtoupper(htmlspecialchars(trim($_POST["student_name"])));
     $phone_number = htmlspecialchars(trim($_POST["phone_number"]));
     $student_id_code = strtoupper(htmlspecialchars(trim($_POST["student_id_code"])));
     $class_codes = [
@@ -24,12 +24,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ];
     $diploma_code = htmlspecialchars(trim($_POST["diploma_code"]));
 
-    // Validation
+    // Checks if the name, phone number, id code and diploma code is empty, if it is, it produces an error message.
     if (empty($student_name) || empty($phone_number) || empty($student_id_code) || empty($diploma_code)) {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("All fields except class codes are required."));
         exit();
     }
-
+    // Checks if the name, id code and phone number have the correct format using regular expressions. If the format does not match, it produces an error message.
     if (!preg_match('/^[a-zA-Z ]+$/', $student_name)) {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Student name must contain only alphabets and spaces."));
         exit();
@@ -45,32 +45,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Check for existing phone number
-    $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE phone_number = ?");
-    $stmt->bind_param("s", $phone_number);
-    $stmt->execute();
-    $stmt->bind_result($phone_exists);
-    $stmt->fetch();
-    $stmt->close();
-
-    if ($phone_exists > 0) {
+    // Prepare a statement to count the number of users with the given phone number
+    // Bind the phone_number variable to the query to prevent SQL injection
+    $phone_number_stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE phone_number = ?");
+    $phone_number_stmt->bind_param("s", $phone_number);
+    $phone_number_stmt->execute();
+    $phone_number_stmt->bind_result($number_exists);
+    $phone_number_stmt->fetch();
+    $phone_number_stmt->close();
+    //if there is more than 1 count, it means that there is a duplicate of the provided phone number, giving error.
+    if ($number_exists > 0) {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Phone number already exists."));
         exit();
     }
 
     $non_null_class_codes = array_filter($class_codes);
     if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
-        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Ensure that all class codes are unique."));
+        header("Location: admin_create_stu_recordform.php?error=" . urlencode("Ensure that all classes are unique."));
         exit();
     }
 
-    // Check for existing student ID
-    $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
-    $stmt->bind_param("s", $student_id_code);
-    $stmt->execute();
-    $stmt->bind_result($id_exists);
-    $stmt->fetch();
-    $stmt->close();
+    // Check for existing student ID using same principle as phone number checking
+    $id_stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
+    $id_stmt->bind_param("s", $student_id_code);
+    $id_stmt->execute();
+    $id_stmt->bind_result($id_exists);
+    $id_stmt->fetch();
+    $id_stmt->close();
 
     if ($id_exists > 0) {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Student ID code already exists."));
@@ -79,23 +80,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validate and check each class code in the `class` table
     foreach ($class_codes as $class_code) {
+        //skip class codes that are NULL (empty) in the array
         if (!empty($class_code)) {
-            // Validate class code format
+            // Only validate class code format that are not empty
             if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
-                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Invalid class code format for Class Code. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
+                header("Location: admin_create_stu_recordform.php?error=" . urlencode("Invalid class code format for Class Code. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
                 exit();
             }
-
             // Check if the class exists in the database
-            $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
-            $stmt->bind_param('s', $class_code);
-            $stmt->execute();
-            $stmt->bind_result($class_exists);
-            $stmt->fetch();
-            $stmt->close();
-
+            $class_stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
+            $class_stmt->bind_param('s', $class_code);
+            $class_stmt->execute();
+            $class_stmt->bind_result($class_exists);
+            $class_stmt->fetch();
+            $class_stmt->close();
+            //if number of class mentioned is 0, it means that it does not exist.
             if ($class_exists == 0) {
-                header("Location: admin_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
+                header("Location: admin_create_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
                 exit();
             }
         }
@@ -175,6 +176,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($success) {
         $con->commit();
+        // Regenerate CSRF token after form submission
+        unset($_SESSION['csrf_token']);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));        
         header("Location: admin_create_stu_recordform.php?success=1");
         exit();
     }

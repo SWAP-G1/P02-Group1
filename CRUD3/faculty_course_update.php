@@ -102,6 +102,9 @@ $update_stmt->bind_param('sssssss',
 );
 
 if ($update_stmt->execute()) {
+    // Regenerate CSRF token after form submission
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     header("Location: faculty_course_create_form.php?success=2");
 } else {
     header("Location: faculty_course_update_form.php?error=" . urlencode("Update failed: " . $con->error) . "&course_code=$original_coursecode");

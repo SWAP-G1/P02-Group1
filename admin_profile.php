@@ -133,7 +133,7 @@ $con->close();
                 <p style="text-align: center; color: red;"><?php echo $error_message ?? "No data available."; ?></p>
             <?php endif; ?>
             <div style="text-align: center; margin-top: 20px;">
-                <a href="forget_password.php">
+                <a href="password_reset_request.php">
                     <button type="button" class="btn">Change Password</button>
                 </a>
             </div>

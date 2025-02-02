@@ -10,14 +10,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $con = mysqli_connect("localhost", "root", "", "xyz polytechnic"); // Connect to database
 
-// Initialize the error message
     if (!$con) {
         die('Could not connect: ' . mysqli_connect_errno());
     }
     // Retrieve and sanitize inputs
     // Retrieve and sanitize inputs
-    $upd_student_id_code = htmlspecialchars($_POST["upd_student_id_code"]);
-    $upd_student_name = htmlspecialchars($_POST["upd_student_name"]); // Updated student name
+    $upd_student_id_code = strtoupper(htmlspecialchars($_POST["upd_student_id_code"]));
+    $upd_student_name = strtoupper(htmlspecialchars($_POST["upd_student_name"])); // Updated student name
     $upd_phone_number = htmlspecialchars($_POST["upd_phone_number"]); // Updated phone number
     $upd_diploma_code = strtoupper(htmlspecialchars($_POST["upd_diploma_code"])); // Updated diploma code
     $upd_class_codes = [
@@ -84,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
 
             // Reject the class if it has a non-NULL status, unless it's the currently assigned class
-            if ($course_status !== NULL && !in_array($class_code, $existing_classes)) {
+            if ($course_status === "No Status" && !in_array($class_code, $existing_classes)) {
                 header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Class $class_code cannot be assigned because the course has a status assigned to it.") . "&student_id=" . urlencode($student_id_code));
                 exit();
             }
@@ -126,13 +125,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $non_null_class_codes = array_filter($upd_class_codes);
     if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
-        header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Ensure that all class codes are unique.") . "&student_id=" . urlencode($student_id_code));
+        header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Ensure that all classes are unique.") . "&student_id=" . urlencode($student_id_code));
         exit();
+    }
+
+// Only check for duplicate if the updated student ID code is different from the original
+    if ($upd_student_id_code !== $student_id_code) {
+        $id_stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
+        $id_stmt->bind_param("s", $upd_student_id_code);
+        $id_stmt->execute();
+        $id_stmt->bind_result($id_exists);
+        $id_stmt->fetch();
+        $id_stmt->close();
+
+        if ($id_exists > 0) {
+            header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Student ID code already exists.") . "&student_id=" . urlencode($student_id_code));
+            exit();
+        }
     }
     // Proceed to update the record
     $con->begin_transaction(); // Start a transaction
 
-    $upd_email = $student_id_code . "@student.xyz.sg"; // Generate email based on student ID
+    $upd_email = $student_id_code . "@gmail.com"; // Generate email based on student ID
     $query_user = $con->prepare("UPDATE user SET full_name=?, identification_code=?, phone_number=?, email=? WHERE identification_code=?");
     $query_user->bind_param('sssss', $upd_student_name, $upd_student_id_code, $upd_phone_number, $upd_email, $student_id_code);
 
@@ -173,9 +187,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $stmt->close();
     }
+    // Insert rows for NULL class codes (if any)
+    foreach ($null_class_codes as $null_class_code) {
+        $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, NULL, ?)");
+        $stmt->bind_param("ss", $upd_student_id_code, $upd_diploma_code);
+        if (!$stmt->execute()) {
+            $con->rollback();
+            header("Location: admin_update_stu_recordform.php?error=" . urlencode("Error inserting into `student` table: " . $stmt->error));
+            exit();
+        }
+        $stmt->close();
+    }
+
     
 
     $con->commit(); // Commit the transaction
+        // Regenerate CSRF token after form submission
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     header("Location: faculty_create_stu_recordform.php?success=2");
     exit();
 }

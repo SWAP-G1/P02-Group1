@@ -85,6 +85,9 @@ $insert = $con->prepare("
 $insert->bind_param('ssssss', $course_code, $course_name, $diploma_code, $start_date, $end_date, $status);
 
 if ($insert->execute()) {
+    // Regenerate CSRF token after form submission
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     header("Location: admin_course_create_form.php?success=1");
 } else {
     header("Location: admin_course_create_form.php?error=" . urlencode("Error creating course: " . $con->error));

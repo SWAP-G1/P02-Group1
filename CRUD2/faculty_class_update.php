@@ -85,6 +85,9 @@ $update_stmt = $con->prepare("UPDATE class SET
 $update_stmt->bind_param('sssss', $upd_classcode, $upd_coursecode, $upd_classtype, $upd_facultycode, $original_classcode);
 
 if ($update_stmt->execute()) {
+    // Regenerate CSRF token after form submission
+    unset($_SESSION['csrf_token']);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     header("Location: faculty_class_create_form.php?success=2");
 } else {
     header("Location: faculty_class_update_form.php?error=" . urlencode("Update failed: " . $con->error) . "&class_code=$original_classcode");

@@ -1,10 +1,11 @@
 <?php
+// Start the session
 session_start();
-
+session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
 define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
-
+ 
 // Function to check and handle session timeout
 function checkSessionTimeout() {
     if (isset($_SESSION['last_activity'])) {
@@ -161,6 +162,9 @@ if (isset($_POST["insert_button"])) {
             $query = $connect->prepare("INSERT INTO semester_gpa_to_course_code (grade_id, identification_code, course_code, course_score, grade) VALUES (NULL, ?, ?, ?, ?)");
             $query->bind_param('ssds', $identification_code, $course_code, $course_score, $grade);
             if ($query->execute()) {
+                // Regenerate CSRF token after form submission
+                unset($_SESSION['csrf_token']);
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 header("Location: faculty_score.php?success=1");
                 exit();
             }
@@ -221,10 +225,10 @@ if (isset($_POST["update_button"])) {
                     2 => 'Student grade updated successfully.',
                     3 => 'Student grade deleted successfully.'
                 ];
-                echo '<div id="message" class="message">' . $messages[$_GET['success']] . '</div>';
+                echo '<div id="message" class="success-message">' . $messages[$_GET['success']] . '</div>';
             }
             if (isset($_GET['error'])) {
-                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="error-message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>

@@ -1,5 +1,7 @@
 <?php
+// Start the session
 session_start();
+session_regenerate_id(true);
 
 // Connect to the database 'xyz polytechnic_danial'
 $connect = mysqli_connect("localhost", "root", "", "xyz polytechnic");
@@ -36,14 +38,17 @@ if (isset($_GET['operation']) && $_GET['operation'] == 'delete') {
         die('Invalid CSRF token. Possible CSRF attack detected.');
     }
 
-    // Get the ID from the URL parameters
-    $id = $_GET["id"] ?? '';
+    // Get the identification_code from the URL parameters
+    $identification_code = $_GET["identification_code"] ?? '';
 
-    if ($id) {
+    if ($identification_code) {
         // Delete the record from the database
         $query = $connect->prepare("DELETE FROM student_score WHERE identification_code=?");
-        $query->bind_param('i', $id); // Bind the parameter
+        $query->bind_param('s', $identification_code); // Bind the parameter
         if ($query->execute()) {
+                // Regenerate CSRF token after form submission
+            unset($_SESSION['csrf_token']);
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             // If the record was deleted, redirect to the admin page
             header("Location: admin_gpa.php?success=3");
             exit();
@@ -62,4 +67,4 @@ if (isset($_GET['operation']) && $_GET['operation'] == 'delete') {
     header("Location: admin_gpa.php?error=" . urlencode("Error executing DELETE query."));
     exit();
 }
-?>
+?> 
