@@ -17,6 +17,8 @@ Open phpMyAdmin (http://localhost/phpmyadmin)
 Create a new database named xyz_polytechnic
 Import the SQL file: C:\xampp\htdocs\SWAP\xyz_polytechnic.sql
 
+**AFTER DOWNLOADING THE FILES, CREATE "SWAP" FOLDER IN C:\xampp\htdocs\ AND PLACE ALL THE FILES AND FOLDERS IN THIS REPO INSIDE THE C:\xampp\htdocs\SWAP**
+
 1. To login as admin account, use the credentials stated in the phpMyAdmin database (a00x@gmail.com), with password XYZadm2025&
 
 2. To login as faculty account, use the credentials stated in the phpMyAdmin database (fxxx@gmail.com), with password XYZfac2025#
