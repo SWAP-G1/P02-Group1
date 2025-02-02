@@ -55,7 +55,7 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="navbar">
         <div class="navbar-brand">
             <img src="../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
-            <h1>XYZ Polytechnic Management</h1>
+            <h1>Admin Course Management</h1>
         </div>
         <nav>
             <a href="../admin_dashboard.php">Home</a>
@@ -70,7 +70,7 @@ if (empty($_SESSION['csrf_token'])) {
             <p>Create and manage courses across all schools.</p>
             <?php
                 if (isset($_GET['error'])) {
-                    echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                    echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
                 }
                 if (isset($_GET['success'])) {
                     if ($_GET['success'] == 1) {
@@ -280,5 +280,17 @@ if (empty($_SESSION['csrf_token'])) {
             behavior: 'smooth'
         });
     }
+    
+    function validateDates() {
+    const startDate = new Date(document.getElementById('start_date').value);
+    const endDate = new Date(document.getElementById('end_date').value);
+    
+    if (startDate > endDate) {
+        alert('Start date cannot be after the end date!');
+        return false;
+    }
+    return true;
+    }
+
 </script>
 </html>

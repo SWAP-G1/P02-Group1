@@ -53,6 +53,10 @@ if (empty($end_date)) {
     $end_date = $end_date;
 }
 
+// Check if start date is after end date
+if (!empty($start_date) && !empty($end_date) && strtotime($start_date) > strtotime($end_date)) {
+    die("Start date cannot be after end date");
+}
 
 // Validate diploma belongs to faculty's school
 $diploma_check = $con->prepare("

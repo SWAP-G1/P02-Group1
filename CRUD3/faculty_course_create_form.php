@@ -96,7 +96,7 @@ if (empty($_SESSION['csrf_token'])) {
             <p>Create and manage courses.</p>
             <?php
                 if (isset($_GET['error'])) {
-                    echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                    echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
                 }
                 if (isset($_GET['success']) && $_GET['success'] == 2) {
                     echo '<div id="message" class="success-message">Course updated successfully.</div>';
@@ -106,7 +106,7 @@ if (empty($_SESSION['csrf_token'])) {
 
         <div class="card">
             <h3>Course Details</h3>
-            <form method="POST" action="faculty_course_create.php">
+            <form method="POST" action="faculty_course_create.php" onsubmit="return validateDates()">
                 <div class="form-group">
                     <label>Course Code</label>
                     <input type="text" name="course_code" pattern="[A-Z]{1}\d{2}" title="Format: 1 uppercase letter followed by 2 digits" required>
@@ -257,6 +257,17 @@ if (empty($_SESSION['csrf_token'])) {
                 top: 0,
                 behavior: 'smooth'
             });
+        }
+
+        function validateDates() {
+        const startDate = new Date(document.getElementsByName('start_date')[0].value);
+        const endDate = new Date(document.getElementsByName('end_date')[0].value);
+        
+        if (startDate > endDate) {
+            alert('Start date cannot be after the end date!');
+            return false;
+        }
+        return true;
         }
     </script>
 </html>

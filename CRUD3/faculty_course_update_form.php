@@ -252,6 +252,16 @@ $course_row = $course_result->fetch_assoc();
                 behavior: 'smooth'
             });
         }
+        function validateDates() {
+        const startDate = new Date(document.getElementsByName('start_date')[0].value);
+        const endDate = new Date(document.getElementsByName('end_date')[0].value);
+        
+        if (startDate > endDate) {
+            alert('Start date cannot be after the end date!');
+            return false;
+        }
+        return true;
+        }
     </script>
 
 </body>

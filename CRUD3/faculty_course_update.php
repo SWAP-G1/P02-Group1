@@ -41,6 +41,10 @@ if (empty($end_date)) {
     $upd_enddate = $upd_enddate;
 }
 
+// Check if start date is after end date
+if (!empty($start_date) && !empty($end_date) && strtotime($start_date) > strtotime($end_date)) {
+    die("Start date cannot be after end date");
+}
 
 if (empty($upd_coursecode) || empty($upd_coursename) || empty($upd_diplomacode) ) {
     header("Location: faculty_course_update_form.php?error=" . urlencode("All fields required.") . "&course_code=$original_coursecode");

@@ -37,6 +37,11 @@ if (empty($upd_enddate)) {
     $upd_enddate = $upd_enddate;
 }
 
+// Check if start date is after end date
+if (!empty($start_date) && !empty($end_date) && strtotime($start_date) > strtotime($end_date)) {
+    header("Location: admin_course_create_form.php?error=" . urlencode("Start date cannot be after end date"));
+    exit();
+}
 
 // Change this section
 if (empty($upd_coursecode) || empty($upd_coursename) || empty($upd_diplomacode)) {

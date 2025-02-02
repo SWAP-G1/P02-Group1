@@ -88,7 +88,7 @@ $course_row = $course_result->fetch_assoc();
             <p>Update course details.</p>
             <?php
             if (isset($_GET['error'])) {
-                echo '<div id="message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             if (isset($_GET['success'])) {
                 if ($_GET['success'] == 2) {
@@ -236,6 +236,17 @@ $course_row = $course_result->fetch_assoc();
         setTimeout(() => {
             window.location.href = "logout.php";
         }, remainingTime * 1000);
+
+        function validateDates() {
+        const startDate = new Date(document.getElementById('start_date').value);
+        const endDate = new Date(document.getElementById('end_date').value);
+        
+        if (startDate > endDate) {
+            alert('Start date cannot be after the end date!');
+            return false;
+        }
+        return true;
+        }
     </script>
 </body>
 </html>
