@@ -89,11 +89,11 @@ if (empty($_SESSION['csrf_token'])) {
             <form method="POST" action="admin_course_create.php" onsubmit="return validateDates()">
                 <div class="form-group">
                     <label>Course Code</label>
-                    <input type="text" name="course_code" pattern="[A-Z]{1}\d{2}" title="Format: 1 uppercase letter followed by 2 digits" required>
+                    <input type="text" name="course_code" title="Format: 1 uppercase letter followed by 2 digits">
                 </div>
                 <div class="form-group">
                     <label>Course Name</label>
-                    <input type="text" name="course_name" required>
+                    <input type="text" name="course_name">
                 </div>
 
                 <div class="form-group">

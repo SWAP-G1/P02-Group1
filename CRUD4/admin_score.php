@@ -3,9 +3,9 @@
 session_start();
 session_regenerate_id(true);
 
-define('SESSION_TIMEOUT', 12); // 600 seconds = 10 minutes
-define('WARNING_TIME', 10); // 60 seconds (1 minute before session ends)
-define('FINAL_WARNING_TIME', 5); // Final warning 3 seconds before logout
+define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
+define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
+define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
  
 // Function to check and handle session timeout
 function checkSessionTimeout() {
@@ -215,7 +215,7 @@ if (isset($_POST["update_button"])) {
 
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="error-message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>

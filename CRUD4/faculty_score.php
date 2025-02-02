@@ -228,7 +228,7 @@ if (isset($_POST["update_button"])) {
                 echo '<div id="message" class="success-message">' . $messages[$_GET['success']] . '</div>';
             }
             if (isset($_GET['error'])) {
-                echo '<div id="error-message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>

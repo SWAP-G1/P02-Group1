@@ -171,7 +171,7 @@ if (isset($_POST["view_button"])) {
 
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="error-message" style="color: red; font-weight: bold;">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
             }
             ?>
         </div>

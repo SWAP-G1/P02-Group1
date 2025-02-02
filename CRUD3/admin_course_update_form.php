@@ -110,13 +110,13 @@ $course_row = $course_result->fetch_assoc();
                     <label class="label">Course Code</label>
                     <input type="text" name="upd_coursecode" pattern="[A-Z]{1}\d{2}" 
                            title="One uppercase letter followed by two digits" 
-                           value="<?php echo htmlspecialchars($course_row['course_code']); ?>" required>
+                           value="<?php echo htmlspecialchars($course_row['course_code']); ?>">
                 </div>
 
                 <div class="form-group">
                     <label class="label">Course Name</label>
                     <input type="text" name="upd_coursename" maxlength="50"
-                           value="<?php echo htmlspecialchars($course_row['course_name']); ?>" required>
+                           value="<?php echo htmlspecialchars($course_row['course_name']); ?>">
                 </div>
 
                 <div class="form-group">
