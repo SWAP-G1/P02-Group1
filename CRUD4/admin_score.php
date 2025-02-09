@@ -1,11 +1,12 @@
 <?php
-// Start the session
+// Start the session and regenerate session ID for security
 session_start();
 session_regenerate_id(true);
 
-define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
-define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
-define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before logout
+// Define session timeout constants
+define('SESSION_TIMEOUT', 600); // 10 minutes session timeout
+define('WARNING_TIME', 60); // 1 minute warning before session timeout
+define('FINAL_WARNING_TIME', 3); // Final warning 3 seconds before session ends
  
 // Function to check and handle session timeout
 function checkSessionTimeout() {
@@ -31,33 +32,31 @@ $remaining_time = (isset($_SESSION['last_activity']))
     ? SESSION_TIMEOUT - (time() - $_SESSION['last_activity']) 
     : SESSION_TIMEOUT;
 
-
 // Connect to the database 'xyz polytechnic'
 $connect = mysqli_connect("localhost", "root", "", "xyz polytechnic");
 if (!$connect) {
-    die('Could not connect: ' . mysqli_connect_errno());
+    die('Could not connect: ' . mysqli_connect_errno()); // Display error if connection fails
 }
-
 
 // Generate CSRF token if not already set
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); // Secure CSRF token generation
 }
 
 // Check if the user is logged in and has the correct role
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
-    //Redirect to login page if the user is not logged in or not an admin
-   header("Location: ../login.php");
-   exit();
+    // Redirect to login page if the user is not logged in or not an admin
+    header("Location: ../login.php");
+    exit();
 }
 
-$full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name']:"";
-
+// Get the full name of the logged-in user
+$full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
 
 // Function to check CSRF Token
 function check_csrf_token($csrf_token) {
     if (!isset($_SESSION['csrf_token']) || $csrf_token !== $_SESSION['csrf_token']) {
-        die('Invalid CSRF token. Possible CSRF attack detected.');
+        die('Invalid CSRF token. Possible CSRF attack detected.'); // CSRF validation failed
     }
 }
 
@@ -68,6 +67,7 @@ function assign_grade($course_score) {
         return 'X'; // Return 'X' if the score is not a number
     }
 
+    // Assign grades based on score ranges
     if ($course_score == 4.0) {
         return 'A';
     } elseif ($course_score >= 3.5 && $course_score < 4.0) {
@@ -85,19 +85,18 @@ function assign_grade($course_score) {
     } elseif ($course_score >= 0.0 && $course_score < 1.0) {
         return 'F';
     } else {
-        return 'X';
+        return 'X'; // Invalid score
     }
 }
 
-
-// Insert record functionality for 'testing' database
+// Insert record functionality
 if (isset($_POST["insert_button"])) {
     if ($_POST["insert"] == "yes") {
-         //Validate CSRF token
+        // Validate CSRF token
         $csrf_token = $_POST["csrf_token"] ?? '';
         check_csrf_token($csrf_token);
 
-
+        // Get form data
         $identification_code = $_POST["identification_code"];
         $course_code = $_POST["course_code"];
         $course_score_input = $_POST["course_score"];
@@ -111,38 +110,38 @@ if (isset($_POST["insert_button"])) {
         $course_score = (float)$course_score_input; // Cast to float after validation
         $grade = assign_grade($course_score);
 
-        // Continue with existing logic
+        // Validate score range
         if ($grade == 'X') {
             header("Location: admin_score.php?error=" . urlencode("Invalid score (0-4 only)"));
             exit();
         }
 
-        // Input validation: Check if all inputs are filled  'Error: All fields must be filled out!'
+        // Input validation: Check if all fields are filled
         if (empty($identification_code) || empty($course_code) || empty($course_score) || empty($grade)) {
             header("Location: admin_score.php?error=" . urlencode("All fields are required."));
             exit();
         } else {
-            // Check if the combination of identification_code and course_code already exists
-            $check_query = $connect->prepare("SELECT COUNT(*) FROM semester_gpa_to_course_code WHERE identification_code = ? AND course_code = ?");
-            $check_query->bind_param('ss', $identification_code, $course_code);
-            $check_query->execute();
-            $check_query->bind_result($count);
-            $check_query->fetch();
-            $check_query->close();
+            // Check for duplicate entry in the database
+            $check_query = $connect->prepare("SELECT COUNT(*) FROM semester_gpa_to_course_code WHERE identification_code = ? AND course_code = ?"); // Prepare SQL query to check for existing record
+            $check_query->bind_param('ss', $identification_code, $course_code); // Bind parameters to the query to prevent SQL injection
+            $check_query->execute(); // Execute the prepared statement
+            $check_query->bind_result($count); // Bind the result to the variable $count
+            $check_query->fetch(); // Fetch the result
+            $check_query->close(); // Close the prepared statement
 
             if ($count > 0) {
-                // If the combination exists, display an error message
+                // If duplicate exists, redirect with error message
                 header("Location: admin_score.php?error=" . urlencode("Identification Code and Course Code already exist!"));
                 exit();
             } else {
-                // If the combination doesn't exist, proceed with the insertion
-                $query = $connect->prepare("INSERT INTO semester_gpa_to_course_code (grade_id, identification_code, course_code, course_score, grade) VALUES (NULL, ?, ?, ?, ?)");
-                $query->bind_param('ssds', $identification_code, $course_code, $course_score, $grade); // Bind the parameters
-                if ($query->execute()) {
-                    // Regenerate CSRF token after form submission
-                    unset($_SESSION['csrf_token']);
-                    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-                    header("Location: admin_score.php?success=1");
+                // Insert new record if no duplicate is found
+                $query = $connect->prepare("INSERT INTO semester_gpa_to_course_code (grade_id, identification_code, course_code, course_score, grade) VALUES (NULL, ?, ?, ?, ?)"); // Prepare SQL insert statement
+                $query->bind_param('ssds', $identification_code, $course_code, $course_score, $grade); // Bind parameters for insert
+                if ($query->execute()) { // Execute the insert query
+                    // Regenerate CSRF token after form submission for added security
+                    unset($_SESSION['csrf_token']); // Remove old CSRF token
+                    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); // Generate new CSRF token
+                    header("Location: admin_score.php?success=1"); // Redirect with success message
                     exit();
                 }
             }
@@ -150,25 +149,24 @@ if (isset($_POST["insert_button"])) {
     }
 }
 
-// Update record functionality 
+// Update record functionality
 if (isset($_POST["update_button"])) {
     $csrf_token = $_POST["csrf_token"] ?? '';
     check_csrf_token($csrf_token);
 
-    $id=$_POST["id"];
-    $identification_code = $_POST["identification_code"];
-    $course_code = $_POST["course_code"];
-    $course_score = (float)$_POST["course_score"];
-    $grade = assign_grade($course_score); // Automatically assign grade
+    $id = $_POST["id"]; // Get the unique ID of the record to be updated
+    $identification_code = $_POST["identification_code"]; // Retrieve the updated student identification code from the form
+    $course_code = $_POST["course_code"]; // Retrieve the updated course code from the form
+    $course_score = (float)$_POST["course_score"]; // Retrieve and cast the updated course score to a float
+    $grade = assign_grade($course_score); // Automatically assign grade based on the updated course score
 
-    $query = $connect->prepare("UPDATE semester_gpa_to_course_code SET identification_code=?, course_code=?, course_score=?, grade=? WHERE grade_id=?");
-    $query->bind_param('ssdsi', $identification_code, $course_code, $course_score, $grade, $id); // Bind the parameters
-    $query->execute();
+    // Update the record in the database
+    $query = $connect->prepare("UPDATE semester_gpa_to_course_code SET identification_code=?, course_code=?, course_score=?, grade=? WHERE grade_id=?"); // Prepare SQL update statement
+    $query->bind_param('ssdsi', $identification_code, $course_code, $course_score, $grade, $id); // Bind parameters for update
+    $query->execute(); // Execute the update query
 }
-
-
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -379,7 +377,7 @@ if (isset($_POST["update_button"])) {
             });
         }
         
-    function confirmDelete(id, csrfToken) {
+    function confirmDelete(id, csrfToken) {// Function to confirm deletion
         const modal = document.getElementById("confirmationModal");
         const modalMessage = document.getElementById("confirmationMessage");
         const modalButton = document.getElementById("confirmationButton");

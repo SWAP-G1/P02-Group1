@@ -45,27 +45,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Invalid Student ID format. It must start with letter 'S' followed by 3 numbers."));
         exit();
     }
-
+    //non-null class codes removes empty class code  values using array_filter
     $non_null_class_codes = array_filter($class_codes);
     if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
+        //removes duplicate lines using aray_unique
+        // if the  count of class codes that are not null is different from the unique filtered array, it will reject it as it means there is a duplicate
         header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Ensure that all classes are unique."));
         exit();
     }
 
-    // Check if phone number already exists in the database
+    // Prepare a statement to count the number of users with the given phone number
+    // Bind the phone_number variable to the query to prevent SQL injection
     $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE phone_number = ?");
     $stmt->bind_param("s", $phone_number);
     $stmt->execute();
     $stmt->bind_result($phone_exists);
     $stmt->fetch();
     $stmt->close();
-
+    //if there is more than 1 count, it means that there is a duplicate of the provided phone number, giving error.
     if ($phone_exists > 0) {
         header("Location: faculty_create_stu_recordform.php?error=" . urlencode("Phone number already exists."));
         exit();
     }
 
-    // Check if  student ID already exists
+    // Check for existing student ID using same principle as phone number checking
     $stmt = $con->prepare("SELECT COUNT(*) FROM user WHERE identification_code = ?");
     $stmt->bind_param("s", $student_id_code);
     $stmt->execute();
@@ -80,13 +83,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check if all class codes exist in the `class` table
     foreach ($class_codes as $class_code) {
+        //skip class codes that are NULL (empty) in the array
         if (!empty($class_code)) {
             // Validate class code format
             if (!preg_match('/^[A-Z]{2}\d{2}$/', $class_code)) {
                 header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Invalid class code format for Class Code. Each must be 2 uppercase letters followed by 2 digits.") . "&student_id=" . urlencode($student_id_code));
                 exit();
             }
-
             // Check if the class exists in the database
             $stmt = $con->prepare("SELECT COUNT(*) FROM class WHERE class_code = ?");
             $stmt->bind_param('s', $class_code);
@@ -94,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_result($class_exists);
             $stmt->fetch();
             $stmt->close();
-
+            //if number of class mentioned is 0, it means that it does not exist.
             if ($class_exists == 0) {
                 header("Location: faculty_update_stu_recordform.php?error=" . urlencode("Class $class_code does not exist.") . "&student_id=" . urlencode($student_id_code));
                 exit();
@@ -134,19 +137,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->close();
 
-    // Insert into `student` table (Valid Class Codes First, NULL Last)
+    //hold all non-NULL class codes
     $valid_class_codes = [];
+    //hold NULL class codes
     $null_class_codes = [];
 
     foreach ($class_codes as $class_code) {
         if (!empty($class_code)) {
+            //add class code to valid_class_codes array
             $valid_class_codes[] = $class_code;
         } else {
+            //add class code to null_class_codes array if class code is empty
             $null_class_codes[] = null;
         }
     }
 
-    // Insert valid class codes first
+    // Insert valid class codes first into the database
     foreach ($valid_class_codes as $class_code) {
         $stmt = $con->prepare("INSERT INTO student (identification_code, class_code, diploma_code) VALUES (?, ?, ?)");
         $stmt->bind_param("sss", $student_id_code, $class_code, $diploma_code);
@@ -176,7 +182,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($success) {
         $con->commit();
-            // Regenerate CSRF token after form submission
+        // Regenerate CSRF token after form submission
         unset($_SESSION['csrf_token']);
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         header("Location: faculty_create_stu_recordform.php?success=1");

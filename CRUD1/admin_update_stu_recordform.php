@@ -39,36 +39,38 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
 }
 $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
 
-// Fetch all class codes and associated course names
+// Fetch all class codes and associated course names and use JOIN to join the rows 
+//joins course, diploma table via course code and diploma code
 $class_query = "
     SELECT c.class_code, co.course_name, d.diploma_code
     FROM class c
-    LEFT JOIN course co ON c.course_code = co.course_code
-    LEFT JOIN diploma d ON co.diploma_code = d.diploma_code
+    JOIN course co ON c.course_code = co.course_code
+    JOIN diploma d ON co.diploma_code = d.diploma_code
 ";
-
+//store results in class_result after execution
 $class_result = mysqli_query($con, $class_query);
-
 // Store class codes and course names
 $class_codes = [];
+//checks if class_result exists and there are more than 0 rows
 if ($class_result && mysqli_num_rows($class_result) > 0) {
     while ($row = mysqli_fetch_assoc($class_result)) {
         $class_codes[] = [
+            //array will have class code linked to corresponding course anme and diploma code
             'class_code' => $row['class_code'],
             'course_name' => $row['course_name'],
             'diploma_code' => $row['diploma_code'] 
         ];
     }
 }
-
-
 // Fetch all diploma codes and names
 $diploma_query = "SELECT diploma_code, diploma_name FROM diploma";
 $diploma_result = mysqli_query($con, $diploma_query);
 
 // Fetch student details based on the provided student ID
+//fetch student ID from url
 $student_id = isset($_GET['student_id']) ? $_GET['student_id'] : '';
 if (!empty($student_id)) {
+    //fetch all data related to student based on student id. LEFT JOIN will join the rows even if there is a class code that is empty
     $stmt = $con->prepare("
         SELECT u.full_name, u.phone_number, u.identification_code, s.diploma_code, s.class_code, co.course_name
         FROM user u
@@ -80,8 +82,9 @@ if (!empty($student_id)) {
     $stmt->bind_param('s', $student_id);
     $stmt->execute();
     $result = $stmt->get_result();
-
+    //create existing_classes array and hold class info associated with student
     $existing_classes = [];
+    //set all the values to null initially to prevent any undefined variable error if no rows are returned
     $student_name = $phone_number = $diploma_code = $identification_code = null;
 
     while ($row = $result->fetch_assoc()) {
@@ -90,6 +93,7 @@ if (!empty($student_id)) {
         $diploma_code = $row['diploma_code'];
         $identification_code = $row['identification_code'];
         $existing_classes[] = [
+            // Store the student's class code and corresponding course name in the array
             'class_code' => $row['class_code'],
             'course_name' => $row['course_name']
         ];
@@ -169,9 +173,14 @@ $con->close();
                     <select name="upd_diploma_code" required>
                         <option value="" disabled>Select a Diploma Name</option>
                         <?php
+                        //checks if diploma_result exists with at least one row
                         if ($diploma_result && mysqli_num_rows($diploma_result) > 0) {
                             while ($row = mysqli_fetch_assoc($diploma_result)) {
+                                //iterate over each row in result set
+                                //compares diploma_code from current diploma_code row with student's currently assigned diploma code
+                                //if one of the rows match (then condition), the $selected variable to 'selected' to pre select the assigned diploma code 
                                 $selected = ($row['diploma_code'] === $diploma_code) ? 'selected' : '';
+                                //diploma code is set to the value using the option html
                                 echo "<option value='" . htmlspecialchars($row['diploma_code']) . "' $selected>" . htmlspecialchars($row['diploma_name']) . "</option>";
                             }
                         }
@@ -182,10 +191,15 @@ $con->close();
                 <div class="form-group">
                     <label class="label" for="class_code_1">Class 1</label>
                     <select name="upd_class_code_1">
+                        <!-- if no class is assigned, No Class is set as the option --->
                         <option value="" <?php echo empty($existing_classes[0]['class_code']) ? 'selected' : ''; ?>>No Class</option>
                         <?php
+                        //iterate through class codes array that contain class info fetched from db
                         foreach ($class_codes as $class) {
+                            //check if there is entery in first row of student currently assigned to and if it matches student's assigned class
+                            //if it matches, it will pre select it using selected html, if not, dont pre select it
                             $selected = (!empty($existing_classes[0]) && $class['class_code'] === $existing_classes[0]['class_code']) ? 'selected' : '';
+                            //display the options of the fetches class codes in class_codes array
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "' $selected>" .
                                  htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" .
                                  htmlspecialchars($class['diploma_code']) . ")</option>";

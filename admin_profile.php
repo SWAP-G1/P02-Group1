@@ -53,7 +53,7 @@ if (empty($admin_id_code)) {
     exit();
 }
 
-// Query to fetch admin details and assigned classes, courses, and diplomas
+// Query to fetch admin details and assigned classes, courses, and diplomasbased on admin id code
 $query = "
     SELECT 
         u.full_name, 
@@ -69,7 +69,7 @@ $stmt = $con->prepare($query);
 $stmt->bind_param('s', $admin_id_code);
 $stmt->execute();
 $result = $stmt->get_result();
-
+//store fetches data in admin_data array
 $admin_data = [];
 while ($row = $result->fetch_assoc()) {
     $admin_data[] = $row;
@@ -110,6 +110,7 @@ $con->close();
         <div class="card">
             <img src="user_profile.png" alt="Profile Picture" class="profile-picture" style="display: block; margin: 0 auto; border-radius: 50%; width: 150px; height: 150px;">
             <h2 style="text-align: center;">My Profile</h2>
+            <!---checks if admin_data array is not empty--->
             <?php if (!empty($admin_data)): ?>
                 <table class="profile-table" border="1" bgcolor="white" align="center">
                     <tr>
@@ -129,8 +130,6 @@ $con->close();
                         <td><?php echo htmlspecialchars($admin_data[0]['email']); ?></td>
                     </tr>
                 </table>
-            <?php else: ?>
-                <p style="text-align: center; color: red;"><?php echo $error_message ?? "No data available."; ?></p>
             <?php endif; ?>
             <div style="text-align: center; margin-top: 20px;">
                 <a href="password_reset_request.php">

@@ -41,8 +41,8 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+// Get the user's full name from the session
 $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name']:"";
-
 
 // Function to check CSRF Token
 function check_csrf_token($csrf_token) {
@@ -57,7 +57,7 @@ function assign_grade($course_score) {
     if (!is_numeric($course_score)) {
         return 'X'; // Return 'X' if the score is not a number
     }
-
+ // Assign grades based on score ranges
     if ($course_score == 4.0) {
         return 'A';
     } elseif ($course_score >= 3.5 && $course_score < 4.0) {
@@ -75,7 +75,7 @@ function assign_grade($course_score) {
     } elseif ($course_score >= 0.0 && $course_score < 1.0) {
         return 'F';
     } else {
-        return 'X';
+        return 'X';// Return 'X' for invalid scores
     }
 }
 
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_button'])) {
     // Validate CSRF token
     $csrf_token = $_POST['csrf_token'] ?? '';
     check_csrf_token($csrf_token);
-
+  // Retrieve form data
     $id = $_POST['id'];
     $identification_code = $_POST["identification_code"];
     $course_code = $_POST["course_code"];
@@ -140,98 +140,99 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_button'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Record</title>
+    <meta charset="UTF-8"> <!-- Specifies the character encoding for the document -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper rendering and touch zooming on mobile devices -->
+    <title>Edit Record</title> <!-- Title of the web page displayed on the browser tab -->
     <link rel="stylesheet" href=" ../styles.css"> <!-- Link to your CSS file -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Nunito+Sans:wght@400&family=Poppins:wght@500&display=swap" rel="stylesheet"> <!-- Link to Google Fonts -->
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="navbar-brand">
-            <img src=" ../logo.png" alt="XYZ Polytechnic Logo" class="school-logo">
-            <h1>XYZ Polytechnic Management</h1>
+    <div class="navbar"> <!-- Navigation bar container -->
+        <div class="navbar-brand"> <!-- Branding section in the navbar -->
+            <img src=" ../logo.png" alt="XYZ Polytechnic Logo" class="school-logo"> <!-- School logo image -->
+            <h1>XYZ Polytechnic Management</h1> <!-- Application title -->
         </div>
-        <nav>
-            <a href=" ../faculty_dashboard.php">Home</a>
-            <a href=" ../logout.php">Logout</a>
-            <a><?php echo htmlspecialchars($full_name); ?></a>
+        <nav> <!-- Navigation links -->
+            <a href=" ../faculty_dashboard.php">Home</a> <!-- Link to faculty dashboard -->
+            <a href=" ../logout.php">Logout</a> <!-- Logout link -->
+            <a><?php echo htmlspecialchars($full_name); ?></a> <!-- Displays the full name of the logged-in user -->
         </nav>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <h2>Edit Score Record</h2>
-            <p>Changes student's Course Score and Grade.</p>
+    <div class="container"> <!-- Main container for the content -->
+        <div class="card"> <!-- Card layout for editing score record -->
+            <h2>Edit Score Record</h2> <!-- Section title -->
+            <p>Changes student's Course Score and Grade.</p> <!-- Description of the section -->
             <?php
             // Check if an error parameter was passed
             if (isset($_GET['error'])) {
-                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
+                echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>'; // Display error message if present
             }
 
             // If ?success=2 is set in the URL, display an update success message
             if (isset($_GET['success']) && $_GET['success'] == 2) {
-                echo '<div id="message" class="success-message">Class updated successfully.</div>';
+                echo '<div id="message" class="success-message">Class updated successfully.</div>'; // Display success message
             }
             ?>
         </div>
 
-        <div class="card">
-            <h3>Student Score Details</h3>
-            <form method="post" action="faculty_edit.php">
-                <div class="form-group">
-                    <label class="label" for="identification_code">Student Identification Code</label>
-                    <input type="text" name="identification_code" value="<?php echo htmlspecialchars($identification_code, ENT_QUOTES, 'UTF-8'); ?>" readonly />
+        <div class="card"> <!-- Card for student score details -->
+            <h3>Student Score Details</h3> <!-- Section title -->
+            <form method="post" action="faculty_edit.php"> <!-- Form for updating student scores -->
+                <div class="form-group"> <!-- Group for student ID -->
+                    <label class="label" for="identification_code">Student Identification Code</label> <!-- Label for ID field -->
+                    <input type="text" name="identification_code" value="<?php echo htmlspecialchars($identification_code, ENT_QUOTES, 'UTF-8'); ?>" readonly /> <!-- Student ID input (read-only) -->
                 </div>
-                <div class="form-group">
-                    <label class="label" for="course_code">Course Code</label>
-                    <input type="text" name="course_code" value="<?php echo htmlspecialchars($course_code, ENT_QUOTES, 'UTF-8'); ?>" readonly />
+                <div class="form-group"> <!-- Group for course code -->
+                    <label class="label" for="course_code">Course Code</label> <!-- Label for course code field -->
+                    <input type="text" name="course_code" value="<?php echo htmlspecialchars($course_code, ENT_QUOTES, 'UTF-8'); ?>" readonly /> <!-- Course code input (read-only) -->
                 </div>
-                <div class="form-group">
-                    <label class="label" for="course_score">Course Score</label>
-                    <input type="text" name="course_score" value="<?php echo htmlspecialchars($course_score, ENT_QUOTES, 'UTF-8'); ?>" />
+                <div class="form-group"> <!-- Group for course score -->
+                    <label class="label" for="course_score">Course Score</label> <!-- Label for course score field -->
+                    <input type="text" name="course_score" value="<?php echo htmlspecialchars($course_score, ENT_QUOTES, 'UTF-8'); ?>" /> <!-- Course score input (editable) -->
                 </div>
-                <div class="form-group">
-                    <label class="label" for="grade">Grade</label>
-                    <input type="text" name="grade" value="<?php echo htmlspecialchars($grade, ENT_QUOTES, 'UTF-8'); ?>" readonly />
+                <div class="form-group"> <!-- Group for grade -->
+                    <label class="label" for="grade">Grade</label> <!-- Label for grade field -->
+                    <input type="text" name="grade" value="<?php echo htmlspecialchars($grade, ENT_QUOTES, 'UTF-8'); ?>" readonly /> <!-- Grade input (read-only) -->
                 </div>
-                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                <input type="hidden" name="id" value="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>" />
-                <button type="submit" name="update_button" value="Update Button">Update Score</button>
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>"> <!-- Hidden CSRF token for security -->
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>" /> <!-- Hidden student record ID -->
+                <button type="submit" name="update_button" value="Update Button">Update Score</button> <!-- Submit button -->
             </form>
         </div>
+    </div>
 
-    <footer class="footer">
-        <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
+    <footer class="footer"> <!-- Footer section -->
+        <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p> <!-- Copyright notice -->
     </footer>
 
-    <div id="logoutWarningModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <p id="logoutWarningMessage"></p>
-            <button id="logoutWarningButton">OK</button>
+    <div id="logoutWarningModal" class="modal" style="display: none;"> <!-- Modal for logout warning -->
+        <div class="modal-content"> <!-- Modal content wrapper -->
+            <p id="logoutWarningMessage"></p> <!-- Placeholder for logout warning message -->
+            <button id="logoutWarningButton">OK</button> <!-- Button to close the modal -->
         </div>
     </div>
 
     <script>
         // Remaining time in seconds (calculated in PHP)
-        const remainingTime = <?php echo $remaining_time; ?>;
+        const remainingTime = <?php echo $remaining_time; ?>; // Remaining session time
         const warningTime = <?php echo WARNING_TIME; ?>; // 1 minute before session ends
         const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Final warning 3 seconds before logout
 
         // Function to show the logout warning modal
         function showLogoutWarning(message, redirectUrl = null) {
-            const modal = document.getElementById("logoutWarningModal");
-            const modalMessage = document.getElementById("logoutWarningMessage");
-            const modalButton = document.getElementById("logoutWarningButton");
+            const modal = document.getElementById("logoutWarningModal"); // Get the modal element
+            const modalMessage = document.getElementById("logoutWarningMessage"); // Get the message element
+            const modalButton = document.getElementById("logoutWarningButton"); // Get the button element
 
-            modalMessage.innerText = message;
-            modal.style.display = "flex";
+            modalMessage.innerText = message; // Set the warning message
+            modal.style.display = "flex"; // Display the modal
 
-            modalButton.onclick = function () {
-                modal.style.display = "none";
-                if (redirectUrl) {
-                    window.location.href = redirectUrl;
+            modalButton.onclick = function () { // Define button click behavior
+                modal.style.display = "none"; // Hide the modal
+                if (redirectUrl) { // If a redirect URL is provided
+                    window.location.href = redirectUrl; // Redirect the user
                 }
             };
         }
@@ -242,32 +243,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_button'])) {
                 showLogoutWarning(
                     "You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in."
                 );
-            }, (remainingTime - warningTime) * 1000);
+            }, (remainingTime - warningTime) * 1000); // Trigger warning based on remaining time
         }
 
         // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
             setTimeout(() => {
-                showLogoutWarning("You will be logged out due to inactivity.", " ../logout.php");
+                showLogoutWarning("You will be logged out due to inactivity.", " ../logout.php"); // Final logout warning
             }, (remainingTime - finalWarningTime) * 1000);
         }
+
+        // Hide the message element after 10 seconds
         setTimeout(function() {
-        const messageElement = document.getElementById('message');
-        if (messageElement) {
-            messageElement.style.display = 'none';
-        }
+            const messageElement = document.getElementById('message'); // Get the message element
+            if (messageElement) {
+                messageElement.style.display = 'none'; // Hide the message element
+            }
         }, 10000);
 
         // Automatically log the user out when the session expires
         setTimeout(() => {
-            window.location.href = " ../logout.php";
+            window.location.href = " ../logout.php"; // Redirect to logout page when session expires
         }, remainingTime * 1000);
 
         // Scroll to top functionality
         function scroll_to_top() {
             window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+                top: 0, // Scroll to the top of the page
+                behavior: 'smooth' // Smooth scrolling effect
             });
         }
     </script>

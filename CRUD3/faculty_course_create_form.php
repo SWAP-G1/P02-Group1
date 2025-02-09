@@ -87,6 +87,7 @@ if (empty($_SESSION['csrf_token'])) {
         <nav>
             <a href="../faculty_dashboard.php">Home</a>
             <a href="../logout.php">Logout</a>
+            <a><?php echo htmlspecialchars($full_name); ?></a>
         </nav>
     </div>
 
@@ -97,6 +98,9 @@ if (empty($_SESSION['csrf_token'])) {
             <?php
                 if (isset($_GET['error'])) {
                     echo '<div id="message" class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
+                }
+                if (isset($_GET['success']) && $_GET['success'] == 1) {
+                    echo '<div id="message" class="success-message">Course created successfully.</div>';
                 }
                 if (isset($_GET['success']) && $_GET['success'] == 2) {
                     echo '<div id="message" class="success-message">Course updated successfully.</div>';
@@ -109,7 +113,7 @@ if (empty($_SESSION['csrf_token'])) {
             <form method="POST" action="faculty_course_create.php" onsubmit="return validateDates()">
                 <div class="form-group">
                     <label>Course Code</label>
-                    <input type="text" name="course_code" pattern="[A-Z]{1}\d{2}" title="Format: 1 uppercase letter followed by 2 digits">
+                    <input type="text" name="course_code">
                 </div>
                 <div class="form-group">
                     <label>Course Name</label>

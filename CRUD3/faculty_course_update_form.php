@@ -92,7 +92,7 @@ $course_row = $course_result->fetch_assoc();
             <h1>XYZ Polytechnic Management</h1>
         </div>
         <nav>
-            <a href="../faculty_dashboard">Home</a>
+            <a href="../faculty_dashboard.php">Home</a>
             <a href="../logout.php">Logout</a>
             <a><?php echo htmlspecialchars($full_name); ?></a>
         </nav>
@@ -126,14 +126,13 @@ $course_row = $course_result->fetch_assoc();
 
                 <div class="form-group">
                     <label class="label">Course Code</label>
-                    <input type="text" name="upd_coursecode" pattern="[A-Z]{1}\d{2}" 
-                           title="One uppercase letter followed by two digits" 
+                    <input type="text" name="upd_coursecode"  
                            value="<?php echo htmlspecialchars($course_row['course_code']); ?>" required>
                 </div>
 
                 <div class="form-group">
                     <label class="label">Course Name</label>
-                    <input type="text" name="upd_coursename" maxlength="50"
+                    <input type="text" name="upd_coursename"
                            value="<?php echo htmlspecialchars($course_row['course_name']); ?>" required>
                 </div>
 

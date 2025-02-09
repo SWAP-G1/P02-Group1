@@ -54,7 +54,7 @@ if (empty($faculty_id_code)) {
     exit();
 }
 
-// Query to fetch faculty details and assigned classes, courses, and diplomas
+// Query to fetch faculty details and assigned classes, courses, and diplomas and joins the tables together based on faculty ID
 $query = "
     SELECT 
         u.full_name, 
@@ -81,7 +81,7 @@ $stmt = $con->prepare($query);
 $stmt->bind_param('s', $faculty_id_code);
 $stmt->execute();
 $result = $stmt->get_result();
-
+//store results in faculty_data array
 $faculty_data = [];
 while ($row = $result->fetch_assoc()) {
     $faculty_data[] = $row;
@@ -141,7 +141,7 @@ $con->close();
                         <td><?php echo htmlspecialchars($faculty_data[0]['email']); ?></td>
                     </tr>
                     <tr>
-                        <th>School</th> <!-- Added School Name Row -->
+                        <th>School</th> <!-- School Name Row with the school code for reference -->
                         <td><?php echo htmlspecialchars($faculty_data[0]['school_name']) . " (" . htmlspecialchars($faculty_data[0]['school_code']) . ")"; ?></td>
                     </tr>
                 </table>
@@ -156,13 +156,14 @@ $con->close();
                         <th>Diploma Name</th>
                         <th>Diploma Code</th>
                     </tr>
+                    <!--- iterate over every record in faculty_data array and query can return multiple rows so each one has separate table row--->
                     <?php foreach ($faculty_data as $class): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($class['class_code']); ?></td>
                             <td><?php echo htmlspecialchars($class['class_type']); ?></td>
                             <td><?php echo htmlspecialchars($class['course_code']); ?></td>
                             <td><?php echo htmlspecialchars($class['course_name']); ?></td>
-                            <td><?php echo htmlspecialchars($class['status'] ? $class['status'] : 'No Status'); ?></td>
+                            <td><?php echo htmlspecialchars($class['status']); ?></td>
                             <td><?php echo htmlspecialchars($class['diploma_name']); ?></td>
                             <td><?php echo htmlspecialchars($class['diploma_code']); ?></td>
                         </tr>

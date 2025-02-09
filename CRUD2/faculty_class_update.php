@@ -34,7 +34,7 @@ if (empty($upd_classcode) || empty($upd_coursecode) || empty($upd_classtype) || 
 
 // Validate class code format
 if (!preg_match("/^[A-Z]{2}[0-9]{2}$/", $upd_classcode)) {
-    header("Location: faculty_class_update_form.php?error=" . urlencode("Invalid class code format.") . "&class_code=$original_classcode");
+    header("Location: faculty_class_update_form.php?error=" . urlencode("Invalid class code format. Ensure the class code entered starts with 2 capital letters followed by exactly 2 digits.") . "&class_code=$original_classcode");
     exit();
 }
 

@@ -6,7 +6,7 @@ if (!$con) {
     die('Could not connect to the database: ' . mysqli_connect_error());
 }
 
-// Verify if CSRF token matches
+// Verify if CSRF token matches GET method 
 if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
     die('Invalid CSRF token. Possible CSRF attack detected.');
 }

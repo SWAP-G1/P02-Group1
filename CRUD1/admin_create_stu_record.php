@@ -1,6 +1,6 @@
 <?php
 session_start();
-// Validate CSRF token
+// verify req method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Verify CSRF token
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die('Could not connect: ' . mysqli_connect_errno());
     }
 
-    // Retrieve form data and sanitize inputs
+    // Retrieve form data and sanitize inputs to prevent XSS and SQL injection
     $student_name = strtoupper(htmlspecialchars(trim($_POST["student_name"])));
     $phone_number = htmlspecialchars(trim($_POST["phone_number"]));
     $student_id_code = strtoupper(htmlspecialchars(trim($_POST["student_id_code"])));
@@ -58,9 +58,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Phone number already exists."));
         exit();
     }
-
+    //non-null class codes removes empty class code  values using array_filter
     $non_null_class_codes = array_filter($class_codes);
     if (count($non_null_class_codes) !== count(array_unique($non_null_class_codes))) {
+        //removes duplicate lines using aray_unique
+        // if the  count of class codes that are not null is different from the unique filtered array, it will reject it as it means there is a duplicate
         header("Location: admin_create_stu_recordform.php?error=" . urlencode("Ensure that all classes are unique."));
         exit();
     }
@@ -134,14 +136,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->close();
 
-    // Insert into `student` table (Valid Class Codes First, NULL Last)
+    //hold all non-NULL class codes
     $valid_class_codes = [];
+    //hold NULL class codes
     $null_class_codes = [];
 
     foreach ($class_codes as $class_code) {
         if (!empty($class_code)) {
+            //add class code to valid_class_codes array
             $valid_class_codes[] = $class_code;
         } else {
+            //add class code to null_class_codes array if class code is empty
             $null_class_codes[] = null;
         }
     }

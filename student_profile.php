@@ -50,7 +50,7 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 3) {
 // Fetch admin's full name from the session for display purposes
 $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
 $student_id_code = $_SESSION['session_identification_code'] ?? "";
-
+//fetch student class code even if it is empty 
 $query = "
     SELECT 
         u.full_name, u.phone_number, u.email, u.identification_code, 
@@ -72,12 +72,12 @@ $result = $stmt->get_result();
 
 $student_data = [];
 while ($row = $result->fetch_assoc()) {
-    // Handle NULL values
+    // Handle NULL values (??) and display placeholders
     $row['class_code'] = $row['class_code'] ?? 'No Class';
     $row['class_type'] = $row['class_type'] ?? 'N/A';
     $row['course_name'] = $row['course_name'] ?? 'No Course Assigned';
     $row['status'] = $row['status'] ?? 'N/A';
-    
+    //store data in student_data array
     $student_data[] = $row;
 }
 $stmt->close();
@@ -156,12 +156,10 @@ $con->close();
                             <td><?php echo htmlspecialchars($class['class_code']); ?></td>
                             <td><?php echo htmlspecialchars($class['class_type']); ?></td>
                             <td><?php echo htmlspecialchars($class['course_name']); ?></td>
-                            <td><?php echo htmlspecialchars($class['status'] ? $class['status'] : 'No Status'); ?></td>
+                            <td><?php echo htmlspecialchars($class['status']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </table>
-            <?php else: ?>
-                <p style="text-align: center; color: red;"><?php echo $error_message ?? "No data available."; ?></p>
             <?php endif; ?>
             
             <div style="text-align: center; margin-top: 20px;">

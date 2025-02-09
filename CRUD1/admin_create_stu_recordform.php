@@ -1,5 +1,6 @@
 <?php
 session_start();
+//generate new session id to prevent session hijacking
 session_regenerate_id(true);
 define('SESSION_TIMEOUT', 600); // 600 seconds = 10 minutes
 define('WARNING_TIME', 60); // 60 seconds (1 minute before session ends)
@@ -11,7 +12,7 @@ function checkSessionTimeout() {
         // Calculate the elapsed time since the last activity
         $inactive_time = time() - $_SESSION['last_activity'];
 
-        // If the elapsed time exceeds the timeout duration, just return
+        // If the elapsed time exceeds the timeout limit, just return
         if ($inactive_time > SESSION_TIMEOUT) {
             return; // Let JavaScript handle logout
         }
@@ -24,7 +25,7 @@ function checkSessionTimeout() {
 // Call the session timeout check at the beginning
 checkSessionTimeout();
 
-// Calculate remaining session time for the user
+// Calculate remaining session time for the user before log out
 $remaining_time = (isset($_SESSION['last_activity'])) 
     ? SESSION_TIMEOUT - (time() - $_SESSION['last_activity']) 
     : SESSION_TIMEOUT;
@@ -42,16 +43,17 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Check if the user is logged in and has the correct role (Admin role: 1)
+// Check if the user is logged in and has the correct role (Admin role: 1) if not redirect them to login page
 if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 1) {
     header("Location: ../login.php");
     exit();
 }
 
-// Fetch admin's full name from the session for display purposes
+// Fetch admin's full name from the session for display purposes from session
 $full_name = isset($_SESSION['session_full_name']) ? $_SESSION['session_full_name'] : "";
 
-// Query to fetch all class codes and their associated course names
+// Query to fetch all class codes and their associated course names and diploma codes from class, course and diploma table
+//join tables to get corresponding data
 $class_query = "
     SELECT c.class_code, co.course_name, d.diploma_code 
     FROM class c
@@ -68,7 +70,7 @@ if ($class_result && mysqli_num_rows($class_result) > 0) {
         $class_codes[] = [
             'class_code' => $row['class_code'],
             'course_name' => $row['course_name'],
-            'diploma_code' => $row['diploma_code'] // Ensure diploma_code is added here
+            'diploma_code' => $row['diploma_code'] 
         ];
     }
 }
@@ -147,7 +149,9 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     <select name="diploma_code" required>
                         <option value="" disabled selected>Select a Diploma Name</option>
                         <?php
+                        //checks if diploma_result has rows
                         if ($diploma_result && mysqli_num_rows($diploma_result) > 0) {
+                            //loops through each rows and puts them in option
                             while ($row = mysqli_fetch_assoc($diploma_result)) {
                                 echo "<option value='" . htmlspecialchars($row['diploma_code']) . "'>" . htmlspecialchars($row['diploma_name']) . "</option>";
                             }
@@ -160,6 +164,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                     <select name="class_code_1">
                         <option value="" selected>No Class</option>
                         <?php
+                        //loops through class code array and outputs option for each class
                         foreach ($class_codes as $class) {
                             echo "<option value='" . htmlspecialchars($class['class_code']) . "'>" . htmlspecialchars($class['class_code']) . ": " . htmlspecialchars($class['course_name']) . " (" . htmlspecialchars($class['diploma_code']) . ")" ."</option>";
                         }        
@@ -202,7 +207,8 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
             <?php
 
-            // Query to fetch student details along with class codes and course names and classes with NULL values ("No Class")
+            // Query to fetch student details along with class codes and course names and classes with NULL values ("No Class") using LEFT JOIN to join tables 
+            //and not ignore NULL rows. this created one big table that it fetches the data from
             $stmt = $con->prepare("
                 SELECT 
                     u.identification_code,
@@ -227,9 +233,10 @@ $diploma_result = mysqli_query($con, $diploma_query);
             $stmt->execute();
             // Retrieve the results of the executed query
             $result = $stmt->get_result();
-            // Organize student data into an array for display
+            // Organize student data into students array for display
             $students = [];
             while ($row = $result->fetch_assoc()) {
+                //use student ID as key
                 $student_id = $row['identification_code'];
                 
                 // Check if the student is already in the array
@@ -248,7 +255,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
                 }
             
                 // Assign class codes and course names to available slots
-                // Check if the first slot is empty and if the current row has a valid class code
+                // Check if the first slot is empty and if the current row has a valid class code, if it has, it will store the class code, course name and diploma code
                 if (empty($students[$student_id]['class_code_1']) && !empty($row['class_code'])) {
                     $students[$student_id]['class_code_1'] = $row['class_code'] . ": " . $row['course_name'] . " (" . $row['diploma_code'] . ")";
                 } 
@@ -277,11 +284,14 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
             // Display each student record in the table
             foreach ($students as $student) {
+                //use regex to only display student records and not other users like faculty users
                 if (preg_match('/^S\d{3}$/', $student['identification_code'])) {
                     echo '<tr>';
                     echo '<td>' . htmlspecialchars($student['identification_code']) . '</td>';
                     echo '<td>' . htmlspecialchars($student['full_name']) . '</td>';
                     echo '<td>' . htmlspecialchars($student['phone_number']) . '</td>';
+                    //if class code 2 is NOT empty -> output class code (then condition)
+                    //if empty then display no class (else condition)
                     echo '<td>' . (!empty($student['class_code_1']) ? htmlspecialchars($student['class_code_1']) : 'No Class') . '</td>';
                     echo '<td>' . (!empty($student['class_code_2']) ? htmlspecialchars($student['class_code_2']) : 'No Class') . '</td>';
                     echo '<td>' . (!empty($student['class_code_3']) ? htmlspecialchars($student['class_code_3']) : 'No Class') . '</td>';
@@ -304,6 +314,7 @@ $diploma_result = mysqli_query($con, $diploma_query);
     <footer class="footer">
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
     </footer>
+    <!--- hidden by default. first one is for timeout warning, second is for confirming deletion --->
     <div id="logoutWarningModal" class="modal" style="display: none;">
         <div class="modal-content">
             <p id="logoutWarningMessage"></p>
@@ -317,24 +328,24 @@ $diploma_result = mysqli_query($con, $diploma_query);
             <button onclick="hideModal()">Cancel</button>
         </div>
     </div>
-
-
     <script>
         // Remaining time in seconds (calculated in first part of the PHP)
+        //constants set that cannot be reassigned
         const remainingTime = <?php echo $remaining_time; ?>;
         const warningTime = <?php echo WARNING_TIME; ?>; // Show warning 1 minute before session ends
         const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>; // Show final warning 3 seconds before logout
 
-        // Function to show the logout warning modal
+        // Function to show the logout warning modal, accepts message to show and and set null for the url to redirect to
         function showLogoutWarning(message, redirectUrl = null) {
             const modal = document.getElementById("logoutWarningModal");
             const modalMessage = document.getElementById("logoutWarningMessage");
             const modalButton = document.getElementById("logoutWarningButton");
-
+            //show the logoutWarningModal from the html that was hidden
             modalMessage.innerText = message;
             modal.style.display = "flex";
-
+            
             modalButton.onclick = function () {
+                //popup is hidden when clicked 
                 modal.style.display = "none";
                 if (redirectUrl) {
                     window.location.href = redirectUrl;
@@ -344,12 +355,17 @@ $diploma_result = mysqli_query($con, $diploma_query);
 
         // Notify user 1 minute before logout
         if (remainingTime > warningTime) {
+            // setTimeout delays showing the warning until the remaining time equals the warning time.
+            // For example, if the remainingTime is 60 seconds and warningTime is 30 seconds,
+            // the warning will be shown after (60 - 30) = 30 seconds.
+            // This ensures the warning appears exactly when there are 30 seconds left before logout.
             setTimeout(() => {
                 showLogoutWarning(
                     "You will be logged out in 1 minute due to inactivity. Please interact with the page to stay logged in."
                 );
             }, (remainingTime - warningTime) * 1000);
         }
+
 
         // Final notification 3 seconds before logout
         if (remainingTime > finalWarningTime) {
@@ -358,13 +374,14 @@ $diploma_result = mysqli_query($con, $diploma_query);
             }, (remainingTime - finalWarningTime) * 1000);
         }
         setTimeout(function() {
+        //hides error message popup after 10 seconds
         const messageElement = document.getElementById('message');
         if (messageElement) {
             messageElement.style.display = 'none';
         }
         }, 10000);
 
-        // Automatically log the user out when the session expires
+        // Automatically log the user out when the session expires and remainingtime finishes
         setTimeout(() => {
             window.location.href = "../logout.php";
         }, remainingTime * 1000);

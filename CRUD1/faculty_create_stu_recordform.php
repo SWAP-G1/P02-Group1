@@ -48,17 +48,18 @@ if (!isset($_SESSION['session_role']) || $_SESSION['session_role'] != 2) {
 }
 
 // Fetch faculty's full name from the session for display purposes
+//get faculty id from the session
 // Get faculty's school code 
 $faculty_id = $_SESSION['session_identification_code'];
 $school_stmt = $con->prepare("SELECT school_code FROM faculty WHERE faculty_identification_code = ?");
 $school_stmt->bind_param('s', $faculty_id);
 $school_stmt->execute();
 $school_result = $school_stmt->get_result();
-$school_row = $school_result->fetch_assoc();
-$faculty_school_code = $school_row['school_code'] ?? '';
+$school_row = $school_result->fetch_assoc(); 
+$faculty_school_code = $school_row['school_code'];
 $school_stmt->close();
 
-// Fetch diplomas only for faculty's assigned school 
+// Fetch diploma code and names only for faculty's assigned school 
 $diploma_query = "SELECT diploma_code, diploma_name 
                   FROM diploma 
                   WHERE school_code = ?";
@@ -68,7 +69,7 @@ $diploma_stmt->execute();
 $diploma_result = $diploma_stmt->get_result();
 
 
-// Fetch classes only for faculty's assigned school
+// Fetch classes only for faculty's assigned school code
 $class_query = "
     SELECT c.class_code, co.course_name, d.diploma_code 
     FROM class c
@@ -81,7 +82,7 @@ $class_stmt->execute();
 $class_result = $class_stmt->get_result();
 
 
-// Organize class codes
+// Organize class codes if there is data in class_result
 $class_codes = [];
 if ($class_result && mysqli_num_rows($class_result) > 0) {
     while ($row = mysqli_fetch_assoc($class_result)) {
