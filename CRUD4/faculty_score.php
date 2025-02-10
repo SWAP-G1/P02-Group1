@@ -250,7 +250,7 @@ if (isset($_POST["update_button"])) {
                         // Join the diploma table with student table based on matching diploma_code
                         // Filter records where the school_code matches the provided parameter (placeholder '?')
                         $student_query = $connect->prepare(" 
-                            SELECT s.identification_code  
+                            SELECT DISTINCT s.identification_code  
                             FROM student s  
                             JOIN diploma d ON s.diploma_code = d.diploma_code  
                             WHERE d.school_code = ?  
@@ -310,7 +310,7 @@ if (isset($_POST["update_button"])) {
             // Join the diploma table with alias 'd' based on matching diploma_code from the student table
             // Filter records where the school_code in the diploma table matches the provided parameter (placeholder '?')
             $query = $connect->prepare(" 
-                SELECT sg.*  
+                SELECT DISTINCT sg.*  
                 FROM semester_gpa_to_course_code sg  
                 JOIN student s ON sg.identification_code = s.identification_code  
                 JOIN diploma d ON s.diploma_code = d.diploma_code  
