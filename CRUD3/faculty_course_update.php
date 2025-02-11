@@ -40,15 +40,18 @@ if (empty($upd_startdate)) {
     $upd_startdate = $upd_startdate;
 }
 
-if (empty($end_date)) {
+if (empty($upd_enddate)) {
     $upd_enddate = NULL;
-} else {
-    $upd_enddate = $upd_enddate;
 }
 
-// Check if start date is after end date
-if (!empty($start_date) && !empty($end_date) && strtotime($start_date) > strtotime($end_date)) {
-    die("Start date cannot be after end date");
+
+// ----------------------
+// Date Order Re-Validation
+// ----------------------
+// Ensure that if both updated start and end dates are provided, the end date is strictly after the start date.
+if (!empty($upd_startdate) && !empty($upd_enddate) && strtotime($upd_enddate) <= strtotime($upd_startdate)) {
+    header("Location: faculty_course_update_form.php?error=" . urlencode("End date must be after start date.") . "&course_code=$original_coursecode");
+    exit();
 }
 
 if (empty($upd_coursecode) || empty($upd_coursename) || empty($upd_diplomacode) ) {

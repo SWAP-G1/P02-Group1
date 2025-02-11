@@ -186,6 +186,34 @@ $course_row = $course_result->fetch_assoc();
     </div>
 
     <script>
+    // Function to validate the update form before submission
+    function validateForm() {
+        // Retrieve the start and end date values from the form and convert them to Date objects
+        const startDate = new Date(document.getElementsByName('upd_startdate')[0].value);
+        const endDate = new Date(document.getElementsByName('upd_enddate')[0].value);
+        const errorMessageDiv = document.getElementById('message');
+
+        // Check if the start date is after the end date
+        if (startDate > endDate) {
+            errorMessageDiv.textContent = 'Start date cannot be after the end date!';
+            errorMessageDiv.style.display = 'block';
+            errorMessageDiv.classList.add('error-message');
+            return false; // Prevent form submission
+        }
+
+        // Check if the end date is before the start date
+        if (endDate < startDate) {
+            errorMessageDiv.textContent = 'End date must be after start date';
+            errorMessageDiv.style.display = 'block';
+            errorMessageDiv.classList.add('error-message');
+            return false; // Prevent form submission
+        }
+
+        // If validation passes, hide any error messages and allow form submission
+        errorMessageDiv.style.display = 'none';
+        return true;
+    }
+
     function validateForm() {
         const startDate = new Date(document.getElementsByName('upd_startdate')[0].value);
         const endDate = new Date(document.getElementsByName('upd_enddate')[0].value);

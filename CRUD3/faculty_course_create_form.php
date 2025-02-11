@@ -206,19 +206,21 @@ if (empty($_SESSION['csrf_token'])) {
         <p>&copy; 2024 XYZ Polytechnic Student Management System. All rights reserved.</p>
 </footer>
 <script>
-    function validateForm() {
-        const startDate = new Date(document.getElementsByName('start_date')[0].value);
-        const endDate = new Date(document.getElementsByName('end_date')[0].value);
-        const errorMessageDiv = document.getElementById('message');
-
-        if (startDate > endDate) {
-            errorMessageDiv.textContent = 'Start date cannot be after the end date!';
-            errorMessageDiv.style.display = 'block';
-            errorMessageDiv.classList.add('error-message');
+    /**
+     * Function to validate the start and end dates before form submission.
+     * It ensures that the end date is after the start date.
+     */
+    function validateDates() {
+        // Retrieve the values from the date inputs using their IDs
+        const startDate = document.getElementById('course_start_date').value;
+        const endDate = document.getElementById('course_end_date').value;
+        
+        // Convert the date strings into Date objects for comparison
+        if (new Date(endDate) <= new Date(startDate)) {
+            // If the end date is not after the start date, alert the user and cancel submission
+            header("Location: faculty_course_create_form.php?error=" . urlencode("Start date cannot be after end date"));
             return false;
         }
-
-        errorMessageDiv.style.display = 'none';
         return true;
     }
 
@@ -241,7 +243,7 @@ if (empty($_SESSION['csrf_token'])) {
     window.onload = function() {
         toggleDateFields();
     };
-
+    
     const remainingTime = <?php echo $remaining_time; ?>;
     const warningTime = <?php echo WARNING_TIME; ?>;
     const finalWarningTime = <?php echo FINAL_WARNING_TIME; ?>;

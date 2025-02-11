@@ -266,11 +266,32 @@ if (empty($_SESSION['csrf_token'])) {
         // Convert the date strings into Date objects for comparison
         if (new Date(endDate) <= new Date(startDate)) {
             // If the end date is not after the start date, alert the user and cancel submission
-            alert('End date must be after start date');
+            header("Location: admin_course_create_form.php?error=" . urlencode("Start date cannot be after end date"));
             return false;
         }
         return true;
     }
+
+    function toggleDateFields() {
+        const status = document.querySelector('select[name="status"]').value;
+        const startDateInput = document.querySelector('input[name="course_start_date"]');
+        const endDateInput = document.querySelector('input[name="course_end_date"]');
+
+        if (status === 'No Status') {
+            startDateInput.disabled = true;
+            endDateInput.disabled = true;
+            startDateInput.value = '';
+            endDateInput.value = '';
+        } else {
+            startDateInput.disabled = false;
+            endDateInput.disabled = false;
+        }
+    }
+
+    window.onload = function() {
+        toggleDateFields();
+    };
+
 
     /**
      * Function to show a confirmation modal when a user attempts to delete a course.
